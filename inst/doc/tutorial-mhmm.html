@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+
+<title>Multilevel HMM tutorial</title>
+
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; left: -4em; }
+pre.numberSource a.sourceLine::before
+  { content: attr(title);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<style type="text/css">
+  p.abstract{
+    text-align: center;
+    font-weight: bold;
+  }
+  div.abstract{
+    margin: auto;
+    width: 90%;
+  }
+</style>
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#header {
+text-align: center;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Multilevel HMM tutorial</h1>
+<h4 class="author"><em>Emmeke Aarts</em></h4>
+<address class="author_afil">
+Department of Methodology and Statistics, Utrecht University, Utrecht, the Netherlands <br><br><div class="abstract">
+<p class="abstract">Abstract</p>
+<p>With the  package mHMMbayes you can fit multilevel hidden Markov models. The multilevel hidden Markov model (HMM) is a generalization of the well-known hidden Markov model, tailored to accommodate (intense) longitudinal data of multiple individuals simultaneously. Using a multilevel framework, we allow for heterogeneity in the model parameters (transition probability matrix and conditional distribution), while estimating one overall HMM. The model has a great potential of application in many fields, such as the social sciences and medicine. The model can be fitted on multivariate data with a categorical distribution, and include individual level covariates (allowing for e.g., group comparisons on model parameters). Parameters are estimated using Bayesian estimation utilizing the forward-backward recursion within a hybrid Metropolis within Gibbs sampler. The package also includes a function to simulate data and a function to obtain the most likely hidden state sequence for each individual using the Viterbi algorithm.</p>
+</div>
+
+
+
+<p><br> <br></p>
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<p>Hidden Markov models <span class="citation">(HMMs; Rabiner 1989)</span> are a machine learning method that have been used in many different scientific fields to describe a sequence of observations for several decades. For example, translating a fragment of spoken words into text <span class="citation">(i.e., speech recognition, see e.g. Rabiner 1989; Woodland and Povey 2002)</span>, or the identification of the regions of DNA that encode genes <span class="citation">(i.e., gene tagging, see e.g., Krogh, Mian, and Haussler 1994; Henderson, Salzberg, and Fasman 1997; Burge and Karlin 1998)</span>. The development of this package is, however, motivated from the area of social sciences. Due to technological advancements, it becomes increasingly easy to collect long sequences of data on behavior. That is, we can monitor behavior as it unfolds in real time. An example here of is the interaction between a therapist and a patient, where different types of nonverbal communication are registered every second for a period of 15 minutes. When applying HMMs to such behavioral data, they can be used to extract latent behavioral states over time, and model the dynamics of behavior over time.<br />
+A quite recent development in HMMs is the extension to multilevel HMMs <span class="citation">(see e.g., Altman 2007; Shirley et al. 2010; Rueda, Rueda, and Diaz-Uriarte 2013; Zhang and Berhane 2014; Haan-Rietdijk et al. 2017)</span>. Using the multilevel framework, we can model several sequences (e.g., sequences of different persons) simultaneously, while accommodating the heterogeneity between persons. As a result, we can quantify the amount of variation between persons in their dynamics of behavior, easily perform group comparisons on the model parameters, and investigate how model parameters change as a result of a covariate. For example, are the dynamics between a patient and a therapist different for patients with a good therapeutic outcome and patients with a less favorable therapeutic outcome?<br />
+With the package <code>mHMMbayes</code>, one can estimate these multilevel hidden Markov models. This tutorial starts out with a brief description of the HMM and the multilevel HMM. For a more elaborate and gentle introduction to HMMs, we refer to <span class="citation">Zucchini, MacDonald, and Langrock (2016)</span>. Next, we show how to use the package <code>mHMMbayes</code> through an extensive example, also touching on the issues of determining the number of hidden states and checking model convergence. Information on the used estimation methods and algorithms in the package is given in the vignette <a href="estimation-mhmm.pdf">Estimation of the multilevel hidden Markov model</a>.</p>
+</div>
+<div id="hidden-markov-models" class="section level2">
+<h2>Hidden Markov models</h2>
+<p>Hidden Markov Models are used for data for which 1) we believe that the distribution generating the observation depends on the state of an underlying, hidden state, and 2) the hidden states follow a Markov process, i.e., the states over time are not independent of one another, but the current state depends on the previous state only (and not on earlier states) <span class="citation">(see e.g., Rabiner 1989; Ephraim and Merhav 2002; Cappé 2005; Zucchini, MacDonald, and Langrock 2016)</span>. The HMM is a discrete time model: for each point in time <span class="math inline">\(t\)</span>, we have one hidden state that generates one observed event for that time point <span class="math inline">\(t\)</span>.<br />
+Hence, the probability of observing the current outcome <span class="math inline">\(O_t\)</span> is exclusively determined by the current latent state <span class="math inline">\(S_t\)</span>:</p>
+<p><span class="math display">\[\begin{equation}
+Pr(O_{t} \mid \ O_{t-1}, O_{t-2}, \ldots, O_{1}, \ S_{t}, S_{t-1}, \ldots, S_{1}) = Pr(O_{t} \mid S_{t}).
+\end{equation}\]</span></p>
+<p>The probability of observing <span class="math inline">\(O_t\)</span> given <span class="math inline">\(S_t\)</span> can have any distribution, e.g., discrete or continuous. In the current version of the package <code>mHMMbayes</code>, only the categorical emission distribution is implemented.<br />
+The hidden states in the sequence take values from a countable finite set of states <span class="math inline">\(S_t = i, i \in \{1, 2, \ldots, m\}\)</span>, where <span class="math inline">\(m\)</span> denotes the number of distinct states, that form the Markov chain, with the Markov property:</p>
+<p><span class="math display">\[\begin{equation}
+Pr(S_{t+1} \mid \ S_{t}, S_{t-1}, \ldots, S_{1}) = Pr(S_{t+1} \mid S_{t}).
+\end{equation}\]</span></p>
+<p>That is, the probability of switching to the next state <span class="math inline">\(S_{t+1}\)</span> depends only on the current state <span class="math inline">\(S_t\)</span>. As the HMM is a discrete time model, the duration of a state is represented by the self-transition probabilities <span class="math inline">\(\gamma_{ii}\)</span>, where the probability of a certain time t spent in state <span class="math inline">\(S\)</span> is given by the geometric distribution: <span class="math inline">\(\gamma_{ii}^{t-1}(1-\gamma_{ii})\)</span>.<br />
+The HMM includes three sets of parameters: the initial probabilities of the states <span class="math inline">\(\pi_i\)</span>, the matrix <span class="math inline">\(\mathbf{\Gamma}\)</span> including the transition probabilities <span class="math inline">\(\gamma_{ij}\)</span> between the states, and the state-dependent probability distribution of observing <span class="math inline">\(O_t\)</span> given <span class="math inline">\(S_t\)</span> with parameter set <span class="math inline">\(\boldsymbol{\theta}_i\)</span>. The initial probabilities <span class="math inline">\(\pi_i\)</span> denote the probability that the first state in the hidden state sequence, <span class="math inline">\(S_1\)</span>, is <span class="math inline">\(i\)</span>:</p>
+<p><span class="math display">\[\begin{equation}
+\pi_i = Pr(S_1 = i) \quad \text{with} \sum_i \pi_i = 1. 
+\end{equation}\]</span></p>
+<p>Often, the initial probabilities of the states <span class="math inline">\(\pi_i\)</span> are assumed to be the stationary distribution implied by the transition probability matrix <span class="math inline">\(\mathbf{\Gamma}\)</span>, that is, the long term steady-state probabilities obtained by <span class="math inline">\(\lim_{T \rightarrow \infty} \mathbf{\Gamma}^T\)</span>. The transition probability matrix <span class="math inline">\(\mathbf{\Gamma}\)</span> with transition probabilities <span class="math inline">\(\gamma_{ij}\)</span> denote the probability of switching from state <span class="math inline">\(i\)</span> at time <span class="math inline">\(t\)</span> to state <span class="math inline">\(j\)</span> at time <span class="math inline">\(t+1\)</span>:</p>
+<p><span class="math display">\[\begin{equation}
+\gamma_{ij} = Pr(S_{t+1} = j \mid S_{t} = i) \quad \text{with} \sum_j \gamma_{ij} = 1.
+\end{equation}\]</span></p>
+<p>That is, the transition probabilities <span class="math inline">\(\gamma_{ij}\)</span> in the HMM represent the probability to switch between hidden states rather than between observed acts, as in the MC and CTMC model. The state-dependent probability distribution denotes the probability of observing <span class="math inline">\(O_t\)</span> given <span class="math inline">\(S_t\)</span> with parameter set <span class="math inline">\(\boldsymbol{\theta}_i\)</span>. In case of the package, the state-dependent probability distribution is given by the categorical distribution, and the parameter set <span class="math inline">\(\boldsymbol{\theta}_i\)</span> is the set of state-dependent probabilities of observing categorical outcomes. That is,</p>
+<p><span class="math display">\[\begin{equation}
+Pr(O_t = o \mid S_t = i) \sim \text{Cat} (\boldsymbol{\theta}_i),
+\end{equation}\]</span></p>
+<p>for the observed outcomes <span class="math inline">\(o = 1, 2, \ldots, q\)</span> and where <span class="math inline">\(\boldsymbol{\theta}_i = (\theta_{i1}, \theta_{i2}, \ldots, \theta_{iq})\)</span> is a vector of probabilities for each state <span class="math inline">\(S = i, \ldots, m\)</span> with <span class="math inline">\(\sum \theta_i = 1\)</span>, i.e., within each state, the probabilities of all possible outcomes sum up to 1.<br />
+We assume that all parameters in the HMM are independent of <span class="math inline">\(t\)</span>, i.e., we assume a time-homogeneous model. In the vignette <a href="estimation-mhmm.pdf">Estimation of the multilevel hidden Markov model</a> we discuss three methods (i.e., Maximum likelihood, Expectation Maximization or Baum-Welch algorithm, and Bayesian estimation) to estimate the parameters of an HMM. In the package <code>mHMMbayes</code>, we chose to use Bayesian estimation because of its flexibility, which we will require in the multilevel framework of the model.</p>
+</div>
+<div id="multilevel-hidden-markov-models" class="section level2">
+<h2>Multilevel hidden Markov models</h2>
+<p>Given data of multiple subjects, one may fit the HMM to the data of each subject separately, or fit one and the same HMM model to the data of all subject, under the strong (generally untenable) assumption that the subjects do not differ with respect to the parameters of the HMM. Fitting a different model to each behavioral sequence is not parsimonious, computationally intensive, and results in a large number of parameters estimates. Neither approach lends itself well for a formal comparison (e.g., comparing the parameters over experimental conditions). To facilitate the analysis of multiple subjects, the HMM is extended by putting it in a multilevel framework.<br />
+In multilevel models, model parameters are specified that pertain to different levels in the data. For example, subject-specific model parameters describe the data collected within each subject, and group level parameters describe what is typically observed within the group of subjects, and the variation observed between subjects. In the implemented multilevel HMM, we allow each subject to have its own unique parameter values within the same HMM model (i.e., identical number and similar composition of the hidden states). Rather than estimating these subject-specific parameters individually, we assume that the parameters of the HMM are random, i.e., follow a given group level distribution. Within this multilevel structure, the mean and the variance of the group level distribution of a given parameter thus expresses the overall mean parameter value in a group of subjects and the parameter variability between the subjects in the group.<br />
+Multilevel HMMs have received some attention in the literature. In a frequentist context, <span class="citation">Altman (2007)</span> presented a general framework for HMMs for multiple processes by defining a class of Mixed Hidden Markov Models (MHMMs). These models are however, computationally intensive and due to slow convergence only suited for modeling a limited number of random effects. The approach of Altman has been translated to the Bayesian framework, which proved much faster as the time to reach convergence is decreased <span class="citation">Zhang and Berhane (2014)</span>. In addition, the HMM in a Bayesian context is easier to adapt to a multilevel model, as the need for numerical integration is eliminated. Examples of the application of the multilevel HMM (within a Bayesian framework) are: <span class="citation">Rueda, Rueda, and Diaz-Uriarte (2013)</span> applied the model to the analysis of DNA copy number data, <span class="citation">Zhang and Berhane (2014)</span> to identify risk factors for asthma, <span class="citation">Shirley et al. (2010)</span> to clinical trial data of a treatment for alcoholism and <span class="citation">Haan-Rietdijk et al. (2017)</span> to longitudinal data sets in psychology.<br />
+In the tutorial, we use the following notation for the parameters in the multilevel HMM. The subject specific parameters are supplemented with the prefix <span class="math inline">\(k\)</span>, denoting subject <span class="math inline">\(k \in \{1,2,\ldots,K\}\)</span>. Hence, in the multilevel (Bayesian) HMM, the subject specific parameters are: the subject-specific transition probability matrix <span class="math inline">\(\boldsymbol{\Gamma}_k\)</span> with transition probabilities <span class="math inline">\(\gamma_{k,ij}\)</span>, and the subject-specific emission distributions denoting subject-specific probabilities <span class="math inline">\(\boldsymbol{\theta}_{k,i}\)</span> of categorical outcomes within hidden state <span class="math inline">\(i\)</span>. The initial probabilities of the states <span class="math inline">\(\pi_{k,j}\)</span> are not estimated as <span class="math inline">\(\pi_{k}\)</span> is assumed to be the stationary distribution of <span class="math inline">\(\boldsymbol{\Gamma}_k\)</span>. The group level parameters are: the group level state transition probability matrix <span class="math inline">\(\boldsymbol{\Gamma}\)</span> with transition probabilities <span class="math inline">\(\gamma_{ij}\)</span>, and the group level state-dependent probabilities <span class="math inline">\(\boldsymbol{\theta}_{i}\)</span>. We fit the model using Bayesian estimation (i.e., a hybrid Metropolis Gibbs sampler that utilizes the forward-backward recursion to sample the hidden state sequence of each subject, see the vignette <a href="estimation-mhmm.pdf">Estimation of the multilevel hidden Markov model</a>).</p>
+</div>
+<div id="using-the-package-mhmmbayes" class="section level2">
+<h2>Using the package mHMMbayes</h2>
+<p>We illustrate using the package using the embedded example data <code>nonverbal</code>. The data contains the nonverbal communication of 10 patient-therapist couples, recorded for 15 minutes at a frequency of 1 observation per second (= 900 observations per couple). The following variables are contained in the dataset:</p>
+<ul>
+<li><code>id</code>: id variable of patient - therapist couple to distinguish which observation belongs to which couple.</li>
+<li><code>p_verbalizing</code>: verbalizing behavior of the patient, consisting of 1 = not verbalizing, 2 = verbalizing, 3 = back channeling.</li>
+<li><code>p_looking</code>: looking behavior of the patient, consisting of 1 = not looking at therapist, 2 = looking at therapist.</li>
+<li><code>t_verbalizing</code>: verbalizing behavior of the therapist, consisting of 1 = not verbalizing, 2 = verbalizing, 3 = back channeling.</li>
+<li><code>t_looking</code>: looking behavior of the therapist, consisting of 1 = not looking at patient, 2 = looking at patient. The top 6 rows of the dataset are provided below.</li>
+</ul>
+<p>When we plot the data of the first 5 minutes (= the first 300 observations) of the first couple, we get the following:</p>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+<p>We can, for example, observe that both the patient and the therapist are mainly looking at each other during the observed 5 minutes. During the first minute, the patient is primarily speaking. During the second minute, the therapists starts, after which the patient takes over while the therapist is back channeling.</p>
+<div id="a-simple-model" class="section level3">
+<h3>A simple model</h3>
+<p>To fit a simple 2 state multilevel model with the function <code>mHMM</code>, one first has to specify some general model properties and starting values:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1"><span class="kw">library</span>(mHMMbayes)</a>
+<a class="sourceLine" id="cb1-2" title="2"><span class="co"># specifying general model properties:</span></a>
+<a class="sourceLine" id="cb1-3" title="3">m &lt;-<span class="st"> </span><span class="dv">2</span></a>
+<a class="sourceLine" id="cb1-4" title="4">n_dep &lt;-<span class="st"> </span><span class="dv">4</span></a>
+<a class="sourceLine" id="cb1-5" title="5">q_emiss &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">3</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">2</span>)</a>
+<a class="sourceLine" id="cb1-6" title="6"></a>
+<a class="sourceLine" id="cb1-7" title="7"><span class="co"># specifying starting values</span></a>
+<a class="sourceLine" id="cb1-8" title="8">start_TM &lt;-<span class="st"> </span><span class="kw">diag</span>(.<span class="dv">8</span>, m)</a>
+<a class="sourceLine" id="cb1-9" title="9">start_TM[<span class="kw">lower.tri</span>(start_TM) <span class="op">|</span><span class="st"> </span><span class="kw">upper.tri</span>(start_TM)] &lt;-<span class="st"> </span><span class="fl">.2</span></a>
+<a class="sourceLine" id="cb1-10" title="10">start_EM &lt;-<span class="st"> </span><span class="kw">list</span>(<span class="kw">matrix</span>(<span class="kw">c</span>(<span class="fl">0.05</span>, <span class="fl">0.90</span>, <span class="fl">0.05</span>, </a>
+<a class="sourceLine" id="cb1-11" title="11">                          <span class="fl">0.90</span>, <span class="fl">0.05</span>, <span class="fl">0.05</span>), <span class="dt">byrow =</span> <span class="ot">TRUE</span>,</a>
+<a class="sourceLine" id="cb1-12" title="12">                         <span class="dt">nrow =</span> m, <span class="dt">ncol =</span> q_emiss[<span class="dv">1</span>]), <span class="co"># vocalizing patient</span></a>
+<a class="sourceLine" id="cb1-13" title="13">                  <span class="kw">matrix</span>(<span class="kw">c</span>(<span class="fl">0.1</span>, <span class="fl">0.9</span>, </a>
+<a class="sourceLine" id="cb1-14" title="14">                           <span class="fl">0.1</span>, <span class="fl">0.9</span>), <span class="dt">byrow =</span> <span class="ot">TRUE</span>, <span class="dt">nrow =</span> m,</a>
+<a class="sourceLine" id="cb1-15" title="15">                         <span class="dt">ncol =</span> q_emiss[<span class="dv">2</span>]), <span class="co"># looking patient</span></a>
+<a class="sourceLine" id="cb1-16" title="16">                  <span class="kw">matrix</span>(<span class="kw">c</span>(<span class="fl">0.90</span>, <span class="fl">0.05</span>, <span class="fl">0.05</span>, </a>
+<a class="sourceLine" id="cb1-17" title="17">                           <span class="fl">0.05</span>, <span class="fl">0.90</span>, <span class="fl">0.05</span>), <span class="dt">byrow =</span> <span class="ot">TRUE</span>,</a>
+<a class="sourceLine" id="cb1-18" title="18">                         <span class="dt">nrow =</span> m, <span class="dt">ncol =</span> q_emiss[<span class="dv">3</span>]), <span class="co"># vocalizing therapist</span></a>
+<a class="sourceLine" id="cb1-19" title="19">                  <span class="kw">matrix</span>(<span class="kw">c</span>(<span class="fl">0.1</span>, <span class="fl">0.9</span>, </a>
+<a class="sourceLine" id="cb1-20" title="20">                           <span class="fl">0.1</span>, <span class="fl">0.9</span>), <span class="dt">byrow =</span> <span class="ot">TRUE</span>, <span class="dt">nrow =</span> m,</a>
+<a class="sourceLine" id="cb1-21" title="21">                         <span class="dt">ncol =</span> q_emiss[<span class="dv">4</span>])) <span class="co"># looking therapist</span></a></code></pre></div>
+<p>The first line of code loads the <code>mHMMbayes</code> package and the <code>nonverbal</code> data. Next we specify the general model properties: the number of states used is set by <code>m &lt;- 2</code>, the number of dependent variables in the dataset used to infer the hidden states is specified by <code>n_dep &lt;- 4</code>, and the number of categorical outcomes for each of the dependent variables is specified by <code>q_emiss &lt;- c(3, 2, 3, 2)</code>.</p>
+<div id="starting-values" class="section level4">
+<h4>Starting values</h4>
+<p>The subsequent lines of code specify starting values for both the transition probability matrix and the emission distribution(s), which are given to the model in the argument <code>start_val</code> (see next piece of code). These starting values are used for the first run of the forward backward algorithm. Although the hidden states cannot be observed, one often has an idea for probable compositions of the states. In the example, we expect that there is a state in which the patient mostly speaks, and the therapist is silent, and a state during which the patient is silent and the therapists speaks. In addition, we expect that during both states, the therapist and the patient will be mainly looking at each other instead of looking away. One usually also has some (vague) idea on likely and unlikely switches between states, and the size of self-transition probabilities. In the example, we think a state will usually last quite some seconds, and thus expect a rather high self-transition probability. All these ideas can be used to construct a set of sensible starting values. Using sensible starting values increases convergence speed, and often prevents a problem called ‘label switching’. Hence, using random or uniform starting values is not recommended, and a default option to do so is not included in the package. Note that it is strongly advised to check model convergence and label switching. That is, one should check if the algorithm reaches the same solution when a set of different (but often conceptually similar) starting values are used, and if label switching is not a problem. See the section <em>Checking model convergence and label switching</em> for an example. See the vignette <a href="estimation-mhmm.pdf">Estimation of the multilevel hidden Markov model</a>) for more information on the forward backward algorithm and on the problem of label switching.</p>
+</div>
+<div id="prior-distributions" class="section level4">
+<h4>Prior distributions</h4>
+<p>As the estimation proceeds within a Bayesian context, a (hyper-)prior distribution has to be defined for the group level parameters, i.e., the group level emission and transition probabilities. Default, non-informative priors are used unless specified otherwise by the user. Below, we present some information on this. For a more elaborate explanation on the used (hyper-)prior distributions and their parameters, see the vignette <a href="estimation-mhmm.pdf">Estimation of the multilevel hidden Markov model</a>.<br />
+First of all, note that the prior distributions on the emission distribution and transition probabilities are not on the probabilities directly, but on the intercepts (and regression coefficients given that covariates are used) of the multinomial regression model used to accommodate the multilevel framework of the data. Second, parameters do not each have their own independent prior distribution. As each row of the emission distribution matrix and transition probability matrix sum to one, the individual parameters of these rows are connected. Hence, each row is seen as a set of parameters which are estimated jointly, and each set of parameters has a multivariate prior distribution.<br />
+The sets of intercepts of the multinomial regression model have a multivariate normal distribution. The (hyper-) prior for these intercepts thus consists of a prior distribution on the vector of means, and a prior distribution on the covariance matrix. The hyper-prior for the mean intercepts is a multivariate Normal distribution, with, as default, a vector of means equal to 0, and a parameter <span class="math inline">\(K_0\)</span> with which the covariance matrix is multiplied. Here, <span class="math inline">\(K_0\)</span> denotes the number of observations (i.e., the number of hypothetical prior subjects) on which the prior mean vector of zero’s is based. By default, <span class="math inline">\(K_0\)</span> is set to 1. The hyper-prior for the covariance matrix between the set of (state specific) intercepts has an Inverse Wishart distribution, for which the variance in the default setting equals 3 + <span class="math inline">\(m\)</span> - 1 for the transition probabilities and 3 + <span class="math inline">\(q\)</span> - 1 for the emission probabilities, and the covariance equals 0. The degrees of freedom of the Inverse Wishart distribution is set to 3 + <span class="math inline">\(m\)</span> - 1 for the transition probabilities and 3 + <span class="math inline">\(q\)</span> - 1 for the emission probabilities.<br />
+To specify user specific prior distributions, one uses the input option <code>emiss_hyp_prior</code> for the emission distribution and <code>gamma_hyp_prior</code> for the transition probabilities in the function <code>mHMM</code>. Both objects are a list, containing the elements:</p>
+<ul>
+<li><code>mu0</code>, a list containing <span class="math inline">\(m\)</span> matrices; one matrix for each row of the transition probability matrix gamma or the emission probability matrix. Each matrix contains the hypothesized mean values of the intercepts. Hence, each matrix consists of one row (when not including covariates in the model) and <span class="math inline">\(m - 1\)</span> or <span class="math inline">\(q\)</span> - 1 columns.</li>
+<li><code>K0</code>, the number of hypothetical prior subjects on which this vector of means is based.</li>
+<li><code>nu</code>, the degrees of freedom of the Inverse Wishart distribution.</li>
+<li><code>V</code>, the hypothesized variance-covariance matrix between the set of intercepts.</li>
+</ul>
+<p>Note that <code>K0</code>, <code>nu</code> and <code>V</code> are assumed equal over the states. The mean values of the intercepts (and regression coefficients of the covariates) denoted by <code>mu0</code> are allowed to vary over the states. All elements in the list either have the prefix <code>gamma_</code> or <code>emiss_</code>, depending on which list they belong to. When specifying prior distributions, note that the first element of each row does not have an intercept, as it serves as baseline category in the multivariate regression model. This means, for example, that if we would specify a model with 3 states, <code>mu0</code> is a vector with 2 elements, <code>K0</code> and <code>nu</code> contain 1 element and <code>V</code> is a 2 by 2 matrix.</p>
+</div>
+<div id="fitting-the-model" class="section level4">
+<h4>Fitting the model</h4>
+<p>The multilevel HMM is fitted using the function <code>mHMM</code>:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" title="1"><span class="co"># Run a model without covariate(s) and default priors:</span></a>
+<a class="sourceLine" id="cb2-2" title="2"><span class="kw">set.seed</span>(<span class="dv">14532</span>)</a>
+<a class="sourceLine" id="cb2-3" title="3">out_2st &lt;-<span class="st"> </span><span class="kw">mHMM</span>(<span class="dt">s_data =</span> nonverbal, </a>
+<a class="sourceLine" id="cb2-4" title="4">                    <span class="dt">gen =</span> <span class="kw">list</span>(<span class="dt">m =</span> m, <span class="dt">n_dep =</span> n_dep, <span class="dt">q_emiss =</span> q_emiss), </a>
+<a class="sourceLine" id="cb2-5" title="5">                    <span class="dt">start_val =</span> <span class="kw">c</span>(<span class="kw">list</span>(start_TM), start_EM),</a>
+<a class="sourceLine" id="cb2-6" title="6">                    <span class="dt">mcmc =</span> <span class="kw">list</span>(<span class="dt">J =</span> <span class="dv">1000</span>, <span class="dt">burn_in =</span> <span class="dv">200</span>))</a></code></pre></div>
+<p>The call to <code>mHMM</code> specifies the model with several arguments. The <code>s_data</code> argument specifies the input data used to infer the hidden states over time. The <code>gen</code> and <code>start_val</code> argument specify the general model properties and the starting values, as discussed above. The arguments needed for the MCMC algorithm are given in <code>mcmc</code>: <code>J</code> specifies the number of iterations used by the hybrid metropolis within Gibbs algorithm and <code>burn_in</code> specifies the number of iterations to discard when obtaining the model parameter summary statistics. The function <code>mHMM</code> returns an object of class <code>mHMM</code>, which has <code>print</code> and <code>summary</code> methods to see the results. The <code>print</code> method provides basic information on the model fitted. That is, the number of subjects in the dataset analyzed, the number of iterations and burn-in period, the average log likelihood over all subjects and model fit indices AIC, the number of states specified, and the number of dependent variables the states are based on:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" title="1">out_2st</a>
+<a class="sourceLine" id="cb3-2" title="2"><span class="co">#&gt; Number of subjects: 10 </span></a>
+<a class="sourceLine" id="cb3-3" title="3"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb3-4" title="4"><span class="co">#&gt; 1000 iterations used in the MCMC algorithm with a burn in of 200 </span></a>
+<a class="sourceLine" id="cb3-5" title="5"><span class="co">#&gt; Average Log likelihood over all subjects: -1624.389 </span></a>
+<a class="sourceLine" id="cb3-6" title="6"><span class="co">#&gt; Average AIC over all subjects: 3276.777 </span></a>
+<a class="sourceLine" id="cb3-7" title="7"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb3-8" title="8"><span class="co">#&gt; Number of states used: 2 </span></a>
+<a class="sourceLine" id="cb3-9" title="9"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb3-10" title="10"><span class="co">#&gt; Number of dependent variables used: 4</span></a></code></pre></div>
+<p>The <code>summary</code> method provides information on the estimated parameters. That is, the point estimates of the posterior distribution for the transition probability matrix and the emission distribution of each of the dependent variables at the group level:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" title="1"><span class="kw">summary</span>(out_2st)</a>
+<a class="sourceLine" id="cb4-2" title="2"><span class="co">#&gt; State transition probability matrix </span></a>
+<a class="sourceLine" id="cb4-3" title="3"><span class="co">#&gt;  (at the group level): </span></a>
+<a class="sourceLine" id="cb4-4" title="4"><span class="co">#&gt;  </span></a>
+<a class="sourceLine" id="cb4-5" title="5"><span class="co">#&gt;              To state 1 To state 2</span></a>
+<a class="sourceLine" id="cb4-6" title="6"><span class="co">#&gt; From state 1      0.929      0.071</span></a>
+<a class="sourceLine" id="cb4-7" title="7"><span class="co">#&gt; From state 2      0.074      0.926</span></a>
+<a class="sourceLine" id="cb4-8" title="8"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb4-9" title="9"><span class="co">#&gt;  </span></a>
+<a class="sourceLine" id="cb4-10" title="10"><span class="co">#&gt; Emission distribution for each of the dependent variables </span></a>
+<a class="sourceLine" id="cb4-11" title="11"><span class="co">#&gt;  (at the group level): </span></a>
+<a class="sourceLine" id="cb4-12" title="12"><span class="co">#&gt;  </span></a>
+<a class="sourceLine" id="cb4-13" title="13"><span class="co">#&gt; $p_vocalizing</span></a>
+<a class="sourceLine" id="cb4-14" title="14"><span class="co">#&gt;         Category 1 Category 2 Category 3</span></a>
+<a class="sourceLine" id="cb4-15" title="15"><span class="co">#&gt; State 1      0.018      0.957      0.024</span></a>
+<a class="sourceLine" id="cb4-16" title="16"><span class="co">#&gt; State 2      0.792      0.051      0.152</span></a>
+<a class="sourceLine" id="cb4-17" title="17"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb4-18" title="18"><span class="co">#&gt; $p_looking</span></a>
+<a class="sourceLine" id="cb4-19" title="19"><span class="co">#&gt;         Category 1 Category 2</span></a>
+<a class="sourceLine" id="cb4-20" title="20"><span class="co">#&gt; State 1      0.248      0.752</span></a>
+<a class="sourceLine" id="cb4-21" title="21"><span class="co">#&gt; State 2      0.096      0.904</span></a>
+<a class="sourceLine" id="cb4-22" title="22"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb4-23" title="23"><span class="co">#&gt; $t_vocalizing</span></a>
+<a class="sourceLine" id="cb4-24" title="24"><span class="co">#&gt;         Category 1 Category 2 Category 3</span></a>
+<a class="sourceLine" id="cb4-25" title="25"><span class="co">#&gt; State 1      0.799      0.075      0.117</span></a>
+<a class="sourceLine" id="cb4-26" title="26"><span class="co">#&gt; State 2      0.035      0.945      0.020</span></a>
+<a class="sourceLine" id="cb4-27" title="27"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb4-28" title="28"><span class="co">#&gt; $t_looking</span></a>
+<a class="sourceLine" id="cb4-29" title="29"><span class="co">#&gt;         Category 1 Category 2</span></a>
+<a class="sourceLine" id="cb4-30" title="30"><span class="co">#&gt; State 1      0.047      0.953</span></a>
+<a class="sourceLine" id="cb4-31" title="31"><span class="co">#&gt; State 2      0.277      0.723</span></a></code></pre></div>
+<p>The resulting model indicates 2 well separated states: one in which the patient is speaking and one in which the therapist is speaking. Looking behavior is quite similar for both the patient and the therapist in the 2 states. Information on the estimated parameters can also be obtained using the function <code>obtain_gamma</code> and <code>obtain_emiss</code>. These functions allow the user not only to inspect the estimated parameters at the group level, but for each subject individually as well, by specifying the input variable <code>level = &quot;subject&quot;</code>:<br />
+</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" title="1"><span class="co"># When not specified, level defaults to &quot;group&quot;</span></a>
+<a class="sourceLine" id="cb5-2" title="2">gamma_pop &lt;-<span class="st"> </span><span class="kw">obtain_gamma</span>(out_2st)</a>
+<a class="sourceLine" id="cb5-3" title="3">gamma_pop</a>
+<a class="sourceLine" id="cb5-4" title="4"><span class="co">#&gt;              To state 1 To state 2</span></a>
+<a class="sourceLine" id="cb5-5" title="5"><span class="co">#&gt; From state 1      0.929      0.071</span></a>
+<a class="sourceLine" id="cb5-6" title="6"><span class="co">#&gt; From state 2      0.074      0.926</span></a>
+<a class="sourceLine" id="cb5-7" title="7"></a>
+<a class="sourceLine" id="cb5-8" title="8"><span class="co"># To obtain the subject specific parameter estimates:</span></a>
+<a class="sourceLine" id="cb5-9" title="9">gamma_subj &lt;-<span class="st"> </span><span class="kw">obtain_gamma</span>(out_2st, <span class="dt">level =</span> <span class="st">&quot;subject&quot;</span>)</a>
+<a class="sourceLine" id="cb5-10" title="10">gamma_subj</a>
+<a class="sourceLine" id="cb5-11" title="11"><span class="co">#&gt; $`Subject 1`</span></a>
+<a class="sourceLine" id="cb5-12" title="12"><span class="co">#&gt;              To state 1 To state 2</span></a>
+<a class="sourceLine" id="cb5-13" title="13"><span class="co">#&gt; From state 1      0.942      0.058</span></a>
+<a class="sourceLine" id="cb5-14" title="14"><span class="co">#&gt; From state 2      0.048      0.952</span></a>
+<a class="sourceLine" id="cb5-15" title="15"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb5-16" title="16"><span class="co">#&gt; $`Subject 2`</span></a>
+<a class="sourceLine" id="cb5-17" title="17"><span class="co">#&gt;              To state 1 To state 2</span></a>
+<a class="sourceLine" id="cb5-18" title="18"><span class="co">#&gt; From state 1      0.936      0.064</span></a>
+<a class="sourceLine" id="cb5-19" title="19"><span class="co">#&gt; From state 2      0.060      0.940</span></a>
+<a class="sourceLine" id="cb5-20" title="20"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb5-21" title="21"><span class="co">#&gt; $`Subject 3`</span></a>
+<a class="sourceLine" id="cb5-22" title="22"><span class="co">#&gt;              To state 1 To state 2</span></a>
+<a class="sourceLine" id="cb5-23" title="23"><span class="co">#&gt; From state 1      0.969      0.031</span></a>
+<a class="sourceLine" id="cb5-24" title="24"><span class="co">#&gt; From state 2      0.054      0.946</span></a>
+<a class="sourceLine" id="cb5-25" title="25"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb5-26" title="26"><span class="co">#&gt; $`Subject 4`</span></a>
+<a class="sourceLine" id="cb5-27" title="27"><span class="co">#&gt;              To state 1 To state 2</span></a>
+<a class="sourceLine" id="cb5-28" title="28"><span class="co">#&gt; From state 1      0.934      0.066</span></a>
+<a class="sourceLine" id="cb5-29" title="29"><span class="co">#&gt; From state 2      0.046      0.954</span></a>
+<a class="sourceLine" id="cb5-30" title="30"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb5-31" title="31"><span class="co">#&gt; $`Subject 5`</span></a>
+<a class="sourceLine" id="cb5-32" title="32"><span class="co">#&gt;              To state 1 To state 2</span></a>
+<a class="sourceLine" id="cb5-33" title="33"><span class="co">#&gt; From state 1      0.942      0.058</span></a>
+<a class="sourceLine" id="cb5-34" title="34"><span class="co">#&gt; From state 2      0.058      0.942</span></a>
+<a class="sourceLine" id="cb5-35" title="35"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb5-36" title="36"><span class="co">#&gt; $`Subject 6`</span></a>
+<a class="sourceLine" id="cb5-37" title="37"><span class="co">#&gt;              To state 1 To state 2</span></a>
+<a class="sourceLine" id="cb5-38" title="38"><span class="co">#&gt; From state 1      0.942      0.058</span></a>
+<a class="sourceLine" id="cb5-39" title="39"><span class="co">#&gt; From state 2      0.087      0.913</span></a>
+<a class="sourceLine" id="cb5-40" title="40"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb5-41" title="41"><span class="co">#&gt; $`Subject 7`</span></a>
+<a class="sourceLine" id="cb5-42" title="42"><span class="co">#&gt;              To state 1 To state 2</span></a>
+<a class="sourceLine" id="cb5-43" title="43"><span class="co">#&gt; From state 1      0.929      0.071</span></a>
+<a class="sourceLine" id="cb5-44" title="44"><span class="co">#&gt; From state 2      0.042      0.958</span></a>
+<a class="sourceLine" id="cb5-45" title="45"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb5-46" title="46"><span class="co">#&gt; $`Subject 8`</span></a>
+<a class="sourceLine" id="cb5-47" title="47"><span class="co">#&gt;              To state 1 To state 2</span></a>
+<a class="sourceLine" id="cb5-48" title="48"><span class="co">#&gt; From state 1      0.930      0.070</span></a>
+<a class="sourceLine" id="cb5-49" title="49"><span class="co">#&gt; From state 2      0.081      0.919</span></a>
+<a class="sourceLine" id="cb5-50" title="50"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb5-51" title="51"><span class="co">#&gt; $`Subject 9`</span></a>
+<a class="sourceLine" id="cb5-52" title="52"><span class="co">#&gt;              To state 1 To state 2</span></a>
+<a class="sourceLine" id="cb5-53" title="53"><span class="co">#&gt; From state 1      0.948      0.052</span></a>
+<a class="sourceLine" id="cb5-54" title="54"><span class="co">#&gt; From state 2      0.058      0.942</span></a>
+<a class="sourceLine" id="cb5-55" title="55"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb5-56" title="56"><span class="co">#&gt; $`Subject 10`</span></a>
+<a class="sourceLine" id="cb5-57" title="57"><span class="co">#&gt;              To state 1 To state 2</span></a>
+<a class="sourceLine" id="cb5-58" title="58"><span class="co">#&gt; From state 1      0.960      0.040</span></a>
+<a class="sourceLine" id="cb5-59" title="59"><span class="co">#&gt; From state 2      0.068      0.932</span></a></code></pre></div>
+<p>An additional option that the functions <code>obtain_gamma</code> and <code>obtain_emiss</code> offer is changing the burn-in period used for obtaining the summary statistics, using the input variable <code>burn_in</code>.</p>
+</div>
+</div>
+<div id="graphically-displaying-outcomes" class="section level3">
+<h3>Graphically displaying outcomes</h3>
+<p>The package includes several plot functions to display the fitted model and its parameters. First, one can plot the posterior densities of a fitted model, for both the transition probability matrix gamma and for the emission distribution probabilities. The posterior densities are plotted for the group level and the subject level simultaneously. For example, for the emission distribution for the variable <code>p_vocalizing</code>:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" title="1"><span class="kw">library</span>(RColorBrewer)</a>
+<a class="sourceLine" id="cb6-2" title="2">Voc_col &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="kw">brewer.pal</span>(<span class="dv">3</span>,<span class="st">&quot;PuBuGn&quot;</span>)[<span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">3</span>,<span class="dv">2</span>)])</a>
+<a class="sourceLine" id="cb6-3" title="3">Voc_lab &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;Not Speaking&quot;</span>, <span class="st">&quot;Speaking&quot;</span>, <span class="st">&quot;Back channeling&quot;</span>)</a>
+<a class="sourceLine" id="cb6-4" title="4"></a>
+<a class="sourceLine" id="cb6-5" title="5"><span class="kw">plot</span>(out_2st, <span class="dt">component =</span> <span class="st">&quot;emiss&quot;</span>, <span class="dt">dep =</span> <span class="dv">1</span>, <span class="dt">col =</span> Voc_col, </a>
+<a class="sourceLine" id="cb6-6" title="6">     <span class="dt">parameter =</span> <span class="st">&quot;emiss&quot;</span>, <span class="dt">dep_lab =</span> <span class="kw">c</span>(<span class="st">&quot;Patient vocalizing&quot;</span>), <span class="dt">cat_lab =</span> Voc_lab)</a>
+<a class="sourceLine" id="cb6-7" title="7"><span class="co">#&gt; Warning in plot.window(...): &quot;parameter&quot; is not a graphical parameter</span></a>
+<a class="sourceLine" id="cb6-8" title="8"><span class="co">#&gt; Warning in plot.xy(xy, type, ...): &quot;parameter&quot; is not a graphical parameter</span></a>
+<a class="sourceLine" id="cb6-9" title="9"><span class="co">#&gt; Warning in axis(side = side, at = at, labels = labels, ...): &quot;parameter&quot; is</span></a>
+<a class="sourceLine" id="cb6-10" title="10"><span class="co">#&gt; not a graphical parameter</span></a>
+<a class="sourceLine" id="cb6-11" title="11"></a>
+<a class="sourceLine" id="cb6-12" title="12"><span class="co">#&gt; Warning in axis(side = side, at = at, labels = labels, ...): &quot;parameter&quot; is</span></a>
+<a class="sourceLine" id="cb6-13" title="13"><span class="co">#&gt; not a graphical parameter</span></a>
+<a class="sourceLine" id="cb6-14" title="14"><span class="co">#&gt; Warning in box(...): &quot;parameter&quot; is not a graphical parameter</span></a>
+<a class="sourceLine" id="cb6-15" title="15"><span class="co">#&gt; Warning in title(...): &quot;parameter&quot; is not a graphical parameter</span></a>
+<a class="sourceLine" id="cb6-16" title="16"><span class="co">#&gt; Warning in plot.window(...): &quot;parameter&quot; is not a graphical parameter</span></a>
+<a class="sourceLine" id="cb6-17" title="17"><span class="co">#&gt; Warning in plot.xy(xy, type, ...): &quot;parameter&quot; is not a graphical parameter</span></a>
+<a class="sourceLine" id="cb6-18" title="18"><span class="co">#&gt; Warning in axis(side = side, at = at, labels = labels, ...): &quot;parameter&quot; is</span></a>
+<a class="sourceLine" id="cb6-19" title="19"><span class="co">#&gt; not a graphical parameter</span></a>
+<a class="sourceLine" id="cb6-20" title="20"></a>
+<a class="sourceLine" id="cb6-21" title="21"><span class="co">#&gt; Warning in axis(side = side, at = at, labels = labels, ...): &quot;parameter&quot; is</span></a>
+<a class="sourceLine" id="cb6-22" title="22"><span class="co">#&gt; not a graphical parameter</span></a>
+<a class="sourceLine" id="cb6-23" title="23"><span class="co">#&gt; Warning in box(...): &quot;parameter&quot; is not a graphical parameter</span></a>
+<a class="sourceLine" id="cb6-24" title="24"><span class="co">#&gt; Warning in title(...): &quot;parameter&quot; is not a graphical parameter</span></a></code></pre></div>
+<p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAArMAAAGACAMAAACJPxq3AAABQVBMVEUAAAAAADYAADoAAGAAAGYAOjoAOmYAOpAAW6sAZmYAZpAAZrYGIFYQfJkUkJkYfFYYkJkcfFYckG0ckIMckJk1AAA1M2A1M4c1gM46AAA6ADo6AGY6OgA6Ojo6OmY6OpA6ZmY6ZpA6ZrY6kLY6kNteAABeAGBeMwBeofBmAABmADpmAGZmOgBmOjpmOpBmZgBmkJBmkLZmkNtmtrZmtttmtv+EMzaEwvCQOgCQOjqQZgCQZjqQkDqQkGaQkLaQtpCQttuQtv+Q27aQ29uQ2/+mvduo4vC2ZgC2Zjq2ZpC2kDq2kGa225C229u22/+2/7a2/9u2///KgDbKoWDKwofK4qvK4vDbkDrbkGbbtmbbtpDb25Db27bb/7bb///soWDswofs4qvs4s7s4vD/tmb/trb/25D/27b//7b//9v////y/t5WAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAgAElEQVR4nO2di2PsuHXep8rt3qRqmhfSjdauVbtKGu3aaetG8fWrSRvBch7e9rbuVZy15QenWgn//x9QEs8D4IAAOOADQ3y7VzPDAR9z+M3hjwcg58CamurSYe0NaGrKVPNsU21qnm2qTc2zTbWpebapNjXPNtWm5tmm2tQ821SbmmebalPzbFNtap5tqk3Ns021qXm2qTY1zzbVpubZptrUPNtUm5pnm2pT82xTbWqebapNzbNNtal5tqk2Nc821abm2abadKpnHw9CX/vceeP1796z13eHt0/BWYcW+eLLdBY8vp6xhbmbENymh4lrmKxdBPbLb2GfMKZSnj1c3Ntb8803kdDyFvkqGVpvE0Lb9Prjw1qePefAHq+wTxhVMc86H+7hEAtcvAWqyV/9lE0IbNM/f9P7fLNrB4Ht1/jmnj1f5a73dM/yjfnyln9b+M792v2wjb3e/C8RhiFLXXzjibe++Nv+xUe6xXvwgY6Hw13/8M/98eJf/hfxKX721f75Xw7P9JJNOni5VYlIhBssXKzzo3s0VP/UL/Ti65+bTXC2+j3YYPkZDxfZgT1VOwjsy7euLtmE71ghzw6f634Ijsz1MLQyBB+9N8lDt+DzypgKZHwEyeVBPL9hYMljoTUH037K8OyrSDhks/4NuQnuVr8HGyzn+OgnBZNQmvYQWKG1PPvz2/6x/zz/6mnI9TdyQ8RH7p9+Lqf2H+ujz4e/N3BT+2b9963/QP1UcaR4VPH8D09fOkt2sOvhoF/ChfezXj69Phz8cPSruXxiPzvAjbS3Gm4w1z99w+W8BbSHwHKtwQZKYsU//4f+AHEJQytCJvbBI//i91t5aX295HsX93rqg/i6Ds8fv/4TBpZsh/bRpAhk4S+3fmj79z/6iXyuN8HaarjBSmt4dheB5QeLu7zQFK0bvH5fPLdC+3xlWojwDd9IK7R9kzsRHhWzR31gEjJLtkI7LPuO6dDqhav3kcOOOLgJrhNvu1sNNxjMtWbd4HwD22f77MgW8ixH72GrP/pvP7+1Q3s8REM7HMPEIUO8JUhMHNl0POSSYWiHyZcMCa1aDIZKX35TbM1/NxtpbzXcYGY2YB3PnnlgBxtnB7bUOZjcgBsrcCod3JnWaGiHpfxAIT6WDsCSYWgVVuWkg15f/vCr4pCrvv32VsMNVlqNZ7nONrCTLFvUs0fFPdapgvpqitZ4aPlRAwYDYNfxa38DlwxCe1TfWC+0I9gl9Po9vQJvq+EG6/arevZcA/syAQxY8Tz79ulLcVh5NAj/cLj4y4FbnE//CI+9QzHkTi/DnKPyM/bDHViyXZIRZ6B+aN3TW+M5fs48HMfUHN5Www1WWj3PnmVgH6b11JT0rKBwAd0Du9hlxGGjnU9v5j3q50gZ8RIu2YRW49GlH1q3jAg892PDVGoj7a1+DzYYfLQVPXumgdXnZCv1KYgP0J8ofvQ3j6rHQ1Xiv/x+v3HDuYT96X/My35C4LDBu2u+LZ7z7ppvW0tOCy1f+vXnD0ho+ULFwAyxCe5Wfw42WH+yVT17poHVpZGFPbttgdFYDx6jNk3XqoE9U8/2B79vqDI41/NVZuG6CdUWAnumnlWHN4VOr9//9robdC7aQmDP1LPsy29dyYJ8U1FtILDn6tmm81XzbFNtap5tqk3Ns021qXm2qTY1zzbVpubZptrUPNtUm5pnm2pT82xTbWqebapNzbNNtal5tqk2Nc821abm2aba1DzbVJuaZ5tqU7JnD1od7dVR/pwe9ici/wGdtAfsJQ8PYg06wvJ/8aAn8+fOdvhbFlCXO0NoMV28kWnbDf+yVnCiZ83T3rD9/2z4b48i/f9k+Kt1mmedJROmls0fRIwpHf4X/woGnjBmfZB8ddmtO/k3ReU8y3iiHf6mznw+4nt5MBYB+7qUZ5n0LFjXIMqUU1M8m+TBLqNtfDHpxu1W8izPsr1nGWX7y7Tas1BF86x0EjGxVakWelU8p77pSJpn8/JjZClJC+uG5l3eikt6lrPBoN15lmEH1IKe5Q9iDTrC8n+qMq6YHPJs0kqBc07ItV1Gih3acuWsoPFsIUmenYEN4jyrCWF8+1LVeHYPWplnC3m2k55ZnGf5mhvPLqut8CyhHhtQvYFRdZn5MbKYlIVxNliRZ7vGs9aU5XhWpwnfszTDs1CL8WzHGs+upSV41mCt4Vn9iLMBBUtJVePZPWghnoWnYoBn2cZ4NoMNwJobz2bq+ZN79vpdeVe/l7/gd1EdbvaH3ZHy+fpJ/tFagGflKjyeZdvm2UhgeXlW8SwSWFT74dkOkX7z+erShFaE7fkr73nEPeFRnZtnORkQn2cZ4Fn5LvAszfEsVMYMpwRWnH9BzyZoNzyLRRaE9vr790Noh1/DkDdWlxF8/to31a9c8PumXw5vPF4+X3/x7+XvFLz5wZA0FuBZks+z1C7rpolktS8W2O75+gMSWF+NZ7n6SH2jD22fAl4+vZdBFb8O0GeE13d3w6SH4e/LZ++fr392M8zQt/1saP5ye7cMz5JJPJvu2cI8yx/SAvur6w8vn/3o+fr/uIFFF994lqsP3Y//9rv3x+G3ru70Merl9s374cXjDb+R9c1w9/WL++er4ZfYrr+4fhp2Bo/5MjxLYjwr1+/wbHIZoDDPSs+OBvZPRGC7XwUCi65gPzw7qj5Cz1/3Qtsfs26kZ8VPbL4R2eLvb5DQkkV4lozzrHjT5tkEzyJenZ5sLetHAvsnx98eQOKXY4H1tBueHReP0IV1CDvyXza8k4cw/reP/LFvdP2LoY0IrTmEkQV4Vg/RLcyztmfzeDa4OH1eFQnsb4bAdseL7zxf/18ssJ4az3IN0RzOZfkPvL/cyh+B5TgAThVebg+/cztki+PbL2Roh1OF/7QYz8Jh5ZJjaYRneWL2jgGOlMnK1mclGyQE9tdDYP+8PwdzA4suvjDP9ptbJc+GFS/A9AFeimeZYgOGjjfAeJa/irqwE39K8mxsaTywoj4baKlrZI4az0YU8az5FdgleJbl82xa2vRNczLPxvyvPYuPTzCB9dR4tpQ2yrPELCUoxzIleTaxtTRu2liZwjzLL1dInfl8VDnP6tpUeZ5NnqNbwbPnyrNJajxrLSt9aaM8G1JpnhXHqqxN2IQyBsQE1HhWLwt6djywHz9Jns1xbWmerTTLZg6IwSRHuJoJG+BZU55dgWdFP1g8sMLha7CB4tnYOM7VRBDpNzMHxHjLZgvwLDGDEgcpnhXZtgzPimeZdg0GVtVn2UhgfzoEtuvf+K0f/HnjWUdYZMHOyRgQgy2czcyzKocjPAvMSqy31IsMnp0CtKHAyuP9eGA//ulXfvTy2Y9+He70QtR4Vil5QExg/gV4lqXxrDOOZl2eHQ/sx19cf/jNd+9/df0hHFhP5Xl2q2wQV8aAGEQL8CxzeZaN8izdAM9yjQf2N0NgP3QPy7PB5nl2VLkDYhytxLOqNBvgWXPtwqw8G1zg8DcW2J8Ogf1OH9hf3zaezVTGgBhk7jV5loZ4Vk2mZFaexRZlrqSNBPbjn15/6D3bhQfEIGo8C5U0ICbwziI8y5RnqeZZGuJZnTwS8mZBnu2Yw7ODQoHtVLdtFw6sp8azUMkDYhAtwrP6Lkg6N8ibcmyaZ8cD28nArlWf7Srl2RO1GM+CO3fVwbNJLTVKrMKzXa08e5oW41mWUZ/N5dn8jv+xRaXBcU73l1bj2VJai2eD9VnuZsKS8mZRns04oTM8G9oORI1nS2kxnuWPVm4IjTegZvjskjzbOY8pzbuMmx81nuV6vvKGH9mnDeNnZ39w/cX17y/Fs+YsLMKzUqk8qz1Tkmdjge2GV50aP+t5llfG3aXvh2cpIv3mELmXT61qS55nnzbHs6bhzDyLB7YzY2RGAtt1zx8/jdx/Fg37bngWi6zj2b94EkOOhuTAu8gfeV+jeCWK4mJIEh/k9ayGevFBSl9c/5479GsunpWdtzGeNbXZeXk2EFjo2XBgf+v987/9j8PArv8tAvunSGC9MXWNZ7n4IYwPkBPDt9gwTu5nvBYrX31yzwcj8SFJfJCX/CuHKvWe/cr7P/zs3/yh6d6diWeZ5lka41nGVufZhMB+Zwjjxx9e/qwP6Y+QwHpj6hrPcqlDmBhyJG7fNww8YvpmfqLzVr0vBsz0f8VQpYFnf+9f//4fffd3/8AMo5mJZ5WdfJ4N2Gxdnh0PbMcD+1f33fMfH/7FMFTGCSz3rDs+aT88OyoezYc7NeRIuPTvb/Rb0rP6fRNafpTTno2HNlFTeJZYb2XxrDqUF6/PRgLbDZfXvP7Vd34ZCOzcnt02z46Lp4PP3oshR0NeGAbG/IKfO6hXMpBHO8+qwcy9Z6+f/sga+jV7fVakWckIMOb5POubtVB9NhLYX7794uMPfZ49/rYI7AcksN6YusazXLIkI4Yc6VOF41txLBOvhsCpIUk6tOAcbPDs7xIzQqnwdbfq9vTCThT8E8k2zLPRkd8z8ezwJCGwH2Rg//QOehacg7lj6hrPlpA13kCNUCrKsxJnbZ5l5mqFEZ4V1+GuwLMJpKHWnPSDCuOB3R3PnigzegUM/SrMs9KzypnUeDbCs6nFruI8m+ZZ2HU7omhgd8ezBTT3eAPfs6k8m1mgJeDvBIHbdaV5FmbYNt5gUc073kAPQvSuFtc4W4Rnu5M9a/NscvM23mBhzT9+VvGs8azFBhTlWXjBYxrPloADs5TCPKtUkmdp41mo9Xk2pTArVeZaMLmkOXgWqPFsKW2TZ1Pk2OtUnnWqELFVr86zXeNZrUV5duw3AcDZGKrOfn4qz3bIs3j7xrMLSxRA1+RZhvMsaJk0HrEkIFTBszuvz7qumIVnKcF41nGl4dlkleXZZAdugWe7PfPsfGO+GepZyQZmIK1S49nE2R2eLfStrUFgEMs6PMsazxbh2UI3Oq9BpPEsuqzqeHZHnl2bZz1XDu6lbFWeTfsCqJ+ryVv5fPXZHViWwAfimnZFniVZ5xRz8GyiZ5nh2fQ0X5ZnKRhvkHlzkBrleLbxrLO4LJ5N/wGbwjxLDc+ev2f1biVnwLOJv56YqFyehT2+URXmWQp4dkdakGeVdwvzbLnDYhbPsvV5lu6RZxUhLMOz2rOsKM8CNZ49Y6mjtRxYPTvPWuZl2qkkxLOQe7N59pRB39iCY+3lHRJTZpiPZ88/0a7Cs4G7JmM8m+pZLtB9VUCJC+v0Q+PZpbUuz5IQz+ZIHRan1wvUgszfrfMsdXl2B1qYZ4cnPs8S4dlCPGsOFVPN22WwgcezSd4t71nDVeeeahfmWftkjCnbkmB9dhrPnupZuLgkB1g8u6hnJc/CMTJn71n9ZHaeBU6tgmdZ2sK2wbO08axSaZ7lL9D6LCnAs2ZlJyonzTaeXVzL8ixzeJYqntXVLjXHSTzrP8tTl2FaAbKgF6Lx7MxakGc5ETidC9TlWdemU3jWvNgfzyYPeKhYa/GsTLiMAZ7F7slhWMF6Na6SOy2DZ3MQYS6ePXe/2lqDZ/Xf4W719q32K+PZ9BFdQo1nTxDkWZcMFuJZjgbcs5vh2cDzUNvGs8uJeDxrxgRwzcaz0ryCZ4ksdI3wbIwNCvNsaMnjjRrPLiDAAovyLAM/amfz7FTPWlq0QLs+z9Jd8Syxn/P0NxcbQJ5lqm6g/go2YNPZAKooz6axQePZJbUKzzJY65KlLmJDmTv+IKJt8GzisBrWeHa6zIBWUTZYimc1GwCeNT8lZ22helIFz4qLcBvPzimLMMFIFq0FeZbbl0z1rDXLnniW7o1noYjKhnDiPDxLEJ6VeQIA7Xo423h229I8S5bjWWLzrCp1GefKNzPWhdtlgn07ZcDxJdvvr8mz3X55Fnh2aZ4V/uWazAbFeNY7uEcc0Fl/V+ZZev48a2VVc/heg2flTZM3wrMZebaDjytcwwh5Vnp2HxL9CYvVZzGe5UhGVudZ2AcLpkTm6HIuE+eahWf3IqL+qCS7Es/SbfDsRM+qkQYr8SzbD8/ah2vt2TV4VhDZBnjWW1wGzwrvNp6dUxjPsnV4lvKLbz3Pmk1Zhmc755E1nt2qFuVZyhCeVT+oYMhsFZ6Fh3hr0vgsnZ1uE9R49gQtz7PAs1TzLOVFg+meLVaf5QtrPLtZrcezzOdZJnnWcmoyG5Th2c57sn2e7RrPskV4liE8y+uzbKJnrXkm77SJnu2MdRvPLqXFeVZ6VveSa55l6/KskM0GcdN2rPHsklqHZ5VnRUeCRAO2Ns+CGkAmHGieTT02p3r25fZwOdpQ8GwHbXvWubYYz+KRTeVZpthgbZ5NN6rbUA9I7EwRYVTpefbxcDjcjDRUF9c0npVKzrNYZFfj2aJ7bQM86wfX51m6J54lDLLBCTzrRdbPs/w5zrNsfZ7FzsCiPOt7NkmZPDvE9s17rKHi2d0BrcWzcJ/n8awTWZdn5ZixEZ6lq/Is9GwyJli9EOljv3M8e+zDesde3719QhpynuVjaHW8zjrXEufFSfVZP7JYno3wLKM2HKSyQYe/nF5CSN3vnfvQpSXbZM/2pwoHEdIjng40z/Jv+Q541n4xnWfRyPo8C15ZPKvOIBQmIFu4UZ5VHV+d9Squ9LrBxf1ow93zrLatUnLdAItsOs9SdU0YM55tPDvo5VMRWJhkWeNZ/Y9M5lk8suk8S+G1ClM8G7BK/TyrIvsY9KzPs2edbO1dKkh2Wn0WjWw6z1Ldn1CWZwvk3IgDHJ7tyvLsw0ErVOtCeHY/np3Os6HI5vCsIoPt8WyCZzvLu2V59lMMZxvPFuBZNLIn8iyZhmgFagUdPjk4E2CJmeqz4YY741mi/0rcPLU+6+hEnj29PJtn4M561iHTw3PNWp8dbWjzbO5Qnerk7NATeBbXFJ51BhysxrOpnp2VZ19ub4YiIlfoHMzm2bP3rK3JPBuM7BjP8hcBnqVwJqVknh3anA/PRmeX470Vz+5DJXgW1xjPCs9iPKugYCqhFSgV1MWztPHsMjyrPEv1cANBCoRO8uz58mx/FBvGcYCxBnZD8aviUZ49F0sX5Fk0smM8O7yg8j9zPw7oWWcTKbbJWlvi2aQLwpI9+/D26fnqkj1chhrSNJ49F9NaOmm8ARrZGM/qfKqvwFMT4EYppQKtzbPTTauVwrOd/TKu9PEGd+x4uBvruz1jng3tvTLjDbDIJvOsOQUDBdoyPJvh2VN4NlDaDSvHsw99VMN9t0k8Wynu+nsP5Vk2hWfxyCbzrPEuJXoIbRGezTHtSTyrXhTn2YfLl9u3Ty+3ITZI5NkqUzCy71CeZZN4Fo1sBs8ywLPQralsEOLZ6XCQ5lmnXDADz77cHi7uX99dBhsOObZL4dn6qrbRfXcSz6KRncizUzxrrYdNKtAGTRr1rFvqKsmz0dnTeJam9XRsTSM8S8zjKvVZyLNm8sL1WeDZDNNKw87Gs9HZE3m2RseO8qx8Mp1ncU3hWd3DsDzP2kvr7JeRNc/Hs6/vxvtuG8+yiTyLRnYKz7IiPFug2LUVnn2wzeo33DfPgqqXUvI5GBZZa2b9kzhUvw7zrDbt7nl26KwZbbhnnrVKtFrJtS4sslaeJcx4VpFCgGdlV24VPOsMN5ilPjvaMJlnK4IDoh+8nVmOZ/HIOjxLNBsAz2I8O8Gzq/GsNdxAubcgG3hVLrdhKs/WBLTEesDe0i+n8yweWYdnicOzxOJZwLXGrnALV+PZMQsajlWPpXl26F4cbZjIs5N4aR2l7DKT+0SSncCzaGQdntWlLvVaj5flVgV5IN+zcEXDn5I8G/XsvDwbGfOdyLOJ6X8TIuhTuwVRD86pPctgg8iYb7VsBnmWiuewXKB4lq7Ps+mFA8uzicZYuj7bVcUGDrXCt8Bfngfnrc96PCt+eREMiqEq3WZ7tjzPZhW7OtuzJdkgNjvnAnZePCsV5VlCTqnPokrlWXO5AvSsu4UL8+zIws0bgGNV09I8OxzD3j493AQbpoyfpfjkjSqVZ2GSneJZLLK5PGsyQbZn4YqGP/m7Z+ScK+DBjovNPN7geHH/OIw+Grv/bJRn67r3HMiaozwr0+xEnsUjm8mzTPNsPhtYn2f8dUDQs67z0J09+BXxbGGefX13w/rIxsbPdrFoVcWzbhUWe4dpnNWVf6nkWhcW2UyeZQ7P5hzVR5wyAQ5SsqX8WaW5eXaofA+RDV+nsF+eJTrHTvs9BSyyq/AscV4XELYwmWG7zu0GK8yzKhs8BC+1M4nWXErnbkC9PDvSe6s9O41n8cgm8iwryrNTPZvHsybBdo5nE1eeybOPTv3bq3WNwwHnWVqPZwl4Hm5B5M/KnMSzTmTHeZZJngU3+7Z5tsAZv1h1krJ4FhQM7KPxDPVZXvt2b++L8Oz4sb+rCg6sKmzwHeXZqfVZLLLjPCvdCuqzINlSeiLPnlTsimVLY1lmEEFNGJ9Vaab6bIAN6tS8PIsL5Vmip+gM6/OssvFkns3ea/F+AzgBWLRTxjVvla3PxhpCng15tiqeJcEX9nRyGs/iQnmWaFQd4dlsz4L1TNvWLvBcvLandK5nnT6z8uMNnLvInDfPWng6wrPkNJ7FI5vJs/JBAS0t0YXFppjYLxhZe7uDeRRlgwQlevZBnCE8ur8X6HrWFLkDqotnIUIib6hiKTuBZwORNTMTzbNgxRTnWe3ZDKBFTuzNupOXElumesPKqrBMW5xnj+oM4fkqWDcwPGsOVc4GKLdWkmiVMOOCl9Cz2WwQiizwLNNwYHwrfyi0BM+CnTE7z4I0q/06E8+CYcmx+3V1Ooj+FjOKHDq2KzLyCk5W50dTeDYY2RjPKlaoi2ctMvA9i8yPKcmzoC88du+jSOftsEm1sIFjQbyJ49lcNghGNoVn5XADjGcLFWhL82znpl1o6i61VyHRs/q4NXqPOXmdQsiV1HqoQnPzbDCyOM/qbwWPtsHZrfFswHhd5yTVtT0rUXaEZ7VZ62ADrRl5NsWzDMCBmkSJvuvsIBsQqIcCs/LsaHOnauA8R3g2YYXFPJvCs9ihY7tK4Vl9d++JPJvgWWYsq8cbqIyu2MDiWcSz/O25eHbk4G/zrFXoYohn2cKe3SXPep6dgQ04zbo8yxNtgGeZ5IYCyl4KuPBbT/LetJqDSkJhNjC/Fjh+76O98KyFBifxbCCyNs+SKM8Sw7OZnl2MZ/0063k2LdMWHm/A1MU1YMNME2t7ty6nDyxICvocaVJ9NqRcniWjPDvGBovxrJ1mMZ5N7AorPN6gsy+uqZlnwydd9lT75z/Ke5YFeHaYsn2eZXYvgjPbjDybMrvi2XGgrYlnB0V5VrrVXHhrVCrP2jyr4KAanlXPO6SLSw77Vu1K8mzK7Ipn+cAudL3UeaxBofOwEBvM41mLDVTBYCs8i+5rZCKSZj3PrsmzHcYGxqt1sQGxX7qv1uFZ8dPhWTwbcCDi0Kz9E2kcQINOnYNVwrN1DEZ0rYru8XV4Vqf0LJ5NAZ1ThfCsOofB8izrrPotS/u6rMCz1cHB+NuKZ90uhRl4FjivT7PE8Szg2VIXhBXkWXzAVi08W4fGE6zDBuqGXcvyLDM8y2yezfEshp5m5ZPmRyEZS7OuZxvPniTPswR/V3Z/qTsQLMKz3KFjPOuVtlbnWQ8NUDZoPFtCUZ5VPbaOq9gcPKu/9XyF1OVZ/Tal7uauzrPIQAQ5eX2ejQw4OD+eVel1aZ4Fv7poPCtXX6w+m23jIM8G7zVnj0folmeDVJ6tINGm8qwqdS3Os5ANbJ7lk1Pdho4MMCuftgB/auC3QTprSO3inqXpPFulZwM8K9PrKjxLqd2nAAu0qWzgDzeYiWedyUgFbHE2EMPj03g2dekb0EZ5lorbzGk2oBvnWb/jFqmArcGz3RnxLHEeg83W4VnKUJ41Aw5KGJDl2xhc+G2mMczLuv3abGB4FvFlVWxA/KcEfXslnmU+z1oDDlLdhpoph2dDZoysRnt7IzxLtWcr5lmjFM+uwrPU5ll7wMEpbJCze2JtA71g2+JZCAf4t6sGNlBKZIPFeVb4NplnkwbQluBZZEqH4Sw2CmEVnlU/xRhsXo9nt82ztBjPRjySzbPIcrswztrvrMEGHc+xHWADS1WxwbZ5lnIaoJBnwQ0OTvZscZ4NpdkteFZVD86IZ40NUc8qL5mEqzUnz0ogADxrjUj0PZvFBqV5FkODLbDBmfJsZEcDIliaZ8VZmJjs8Oypnp0ujGfRq2rQUbVJWbY4z3bnxrP4NJBmZdlAFxCMSvIsM55VPKvujWjxrBzmtSmexT2LvGffCimswjzLHJ6FG1AVG2D9X+gzmWPBrb6VynrW41l5D1q9RabzliJ5NqDYYIEiPItevYi85/1+SECFeZbZPFuvZ7VIDA7433l5loR5Vk6QPKs0iQ3M25N5FmcAFA0kG7i390xZ97w866oaNsBSKtpuazyrCgfudy3Ls5OFJ9QwzvqeXfQ3QPJ4duuJFt1/G+BZEuNZQQ5IpwKu2JF9Ms9aBdqRvV0Pz27es0Bb4lntWUaZxbOEuTybppM9G+4sMM9G8uzGebaC7IppUzxrpqmhHXICHG3ATubZDHUjr+S0EZytgGfV9mwfaMd5FqbZdXlWvKQYz9pbPtWzeUZO9ux2eLaHWRa7Ay1vu/mMO77/MDRYg2eNZ1VxlqpKWCLQRitVk0/MTKV21IZb4FkW5FnLqFv3LNBoylWYuQDPqjQOeJaGeBYBWjyRJI0WGFOcZ8dH6MILwrbIsxUZ1WicZ/Wp0fw8C7cjxrPMv/A2Dgen8yxOrjgwqLm93wWJr7Msz3aR+qxqmrr41ZTOs/r1gjxLfJ5VSVZPIciWT/BslpEDZ1vhRNvZM63Cs/S8eFaN57YmsjHPzsUGRB7+Yzyr67Sb4dmAZ3UzJ88uz7NDxIJsYJ0hbj/VMuYi6gjPzskGEJUBz8JLxTXPcm2JZwNnYCjPguQ7qkXrsyz0amsiged+w1V4lhDbs5Y9WEcAABErSURBVBTwrCp2bYRnQ56tkGe3bVmMAtC3t8KzpmhAjWf9s8dFeVa6shaexddrpm7es1K6xKReuk+W8GyYZ82d6ZnLs6m9t/PxrPbseOp0bn4Ua841D88yjA2sL2EVpgVe1C+dFqoJkX9n41k2zrPWlTUM8SwacLhLSGD6qKINQ/eWA+/DAm0SHRQfI0ODnrXn3LRpk7PLEp41bADW6vCs8axs6BUOojx7Os7iv7SEZk7Asy4cxFc6A8/GgTZ058TNiIy8ghOIxQZOsasYz+phXQ7P6hMtPSKRgVsjjm13uk7k2eCltMqzLsKuxLMhzwKe3X6BlotYD+bJop4l+jdxNM9KexrPyhMvprE2sdgV2gvFeDZqQcuzXRR/uWbgWQgHIZ7dOBsIxfOUHm4wK8/CL4b0rCQDQtWGwVvT8z/Znj2dZ5MrXZBnYaN1eFayAepZZj3ftGdTs8singVDvs1qBc8SxbPGs+Z3QDLZIPBmcB5/QItf1ZJpM8yzTjJemGe7GM/Cjdk6G+TxLPGecy3Ps5Sy0VvJpB/oo3AwVnU1z8OelQ+dU6Fdg2eHIlaCZ3N6B9eTj6/ehAU8m8yzqowgc29KsSvW8xpWvJvVdSPaxvbsWjzb0QQ28F9uUXXxrNXDECh2uQrxbKpieSjIpyrP2s4WXQor8GyqZzecad1ez+DuBJ4ly/EsYTjPwmIXwYC2KM/6XnR4odPnVGE2EH8hzy45riuLZytTcN+vw7NElQYoMUUulWmhZz0l59IEng1XXfWLrkMmwyn+jy2kuGQ+nnUTbX2eDbKBfpQ+Xbw+63pWOdri2QQYA/uEhN7AFedZllSdtQoHa/Os51mPDbZrYrcvwZluXpuG1lVbQovzLNOkwB/cwgFi2qBnExXpug1f4GXlWejZVXnWU0XnYBEOBGigH8QI11k8O41n0fvMTTAmfj0cWhRwJnTasxGexcYwjqnxbIJGPKt4ALk5/fI8K5hWJmRsL0zg2bH3x1uZYYYRnnVGyURXviLPbt7EKWygeFYNcp2fZ5n6yUV+IzngZUUMcr4UoJ3Osymt4kd57VnYxxCdbS6epTGe3XCxC2Aqs54FeFYWueb0rFq59KxbJWCQZ5Xc62sm8mxG51mHvo7zrAHapGLXTDyLHJhS+mW2KoK/UgmW6Su2FuRZ4FkKhhxQbW7DDoHPkaYgz/rTgp4NHWM7u2VoyY4KerYDvkU8u9m0mi1Q6mKqG8FcxahVlGf5gl2eZcxlA21jgsCB579wmk3j2UibOBe6eZaFCr+WSnpW8az4oWaHDYIcvj25ZVjvDfUS1rr8fDgnz1KKetY+eGFAa32ENM9OqoKxFJwFngXeXYNnKepZfzxnRZ7FeVZbVvHsfJ5VK1c8S5N41mEDz7NpSp3FZYNw1cAwgVPtWp5n9TVhWIU2PmHDwnmWqCKX4tl5POsNZJAIgvOsxQbeXQ6SFSlj4RODng1Vcjt3wlo8y39W3HPkZrOqp+h+1unV8CyZkWfNWiyepR4bSOuarBwr0Y6UDfI961cNojzbgTxrUu/SPMt/i7HrzCWhFfIs8Z7gcEAImDwrz5o+W8CzPMCyI4OaXAvkjvum7kdI67qdmKuTcNapHKRdXFP6WnEmr2L0PFsRzyqNehZcvz07z4J1E3muRWVa1SsE/Th6kgMHE2kszbOhShdD0xVMq6D18p6lhmcThsnXxLO2xMFX21h3g82aZ+EJIVG4KjyrBsUoPFCIgvffovJ8mc0GPs2aAz/Cs253g2fiERX0LDOeFS+tbRg5e9yY0nhWjS5QQw7IcjzL1OVgVDhaXb2ocq/5DI5n3cKB2gHOLT/gW2BhgXcDskYVep7VbUye7fzZAirp2Y7/QJgYZXgGniX+NIsN7MlkZp6VCZXIfKpGFgi7BXnWNm3IsxFNAtqUoab2fY/034V5Vo3uOgc2GPUsTE0L8KzO4INn+ykCxBiVVTaG8ixh9IRqV6bcgYij3bE+z67lWQm0KM8iN5XbqGnjO1mmVWaoQDt2GZ7lNzigqtpFqKp4ybH2RG1Z4Aob9AM5yudZpDirqTXOs1bJNmLa8jxLUZ5FK3qpa1lUkz0Lq1+DivKsyaWDqPULzZTonwy1edaFA6o2XErzrL/+U3nWG/+NvHTv46nnW9CzTHbaojyLaJue1YqwgfOm6g0zk4vmWSK7EjgbqIOabkKJdV2N2QgEaIEK8uxIh0J4ns5LtIuzAWM0xLMdQgIbZQMt4r8w3Q22Z1WSnc2zTH1LhGeJ7FSgpg3gWdMUG9vlKxt546Uu+95Gfmtl0M6ZthbPUnVWCxJtRZ5NYgNzva0ucc3Ms1b3HCGUGkPK6xU0z+ryrCqIuVsfnRLxTRT07DTrl686zMxm2sI8S0XNKwkOtskG6Z6Vr4ynZuFZc22kcZ9OC+IV4yO4IM/ClvAVg58v1Zf4ZYyjM7uVWZRnneScDAdFeZYpnu2wUTKetulZrXE2sN5TCXeuPCu+F8JxKsNCNw6edYtdulsB7AgX2MoplGYDcCCSr+vZbqQ9UNE8yzQbuJ7FrsXdJhsQ5BnDPUv0c3kWNpNn4aP8flB1IY3aDEoALBjPEvSSEUdFeNbLmCPtO337bw+C1/CsHPPdMZdnfW3dsyNN7HseMcMGc3kW4IjyrO72EvmXEowNCPVOw9J4drTYFeFZi2a9QqzbwJmc0Hlb3LOCZ13Poto2G6B7UuU6WDVYmGf12FlzVbhopQxL7W23GWIKz+YmYuQWG7jLkXE1S/IspXqIHHoZI5ZUtz0a0d5R9oBA27NsZjZQXcPCmyLOxM2fcPQ3AWl5pN4lw5+NBiPL4k/9G8wgrwUfrO5ZqjsWXM9ipa6NwkFK2cAysK5DuSdhs/CseBCelQ1k+iVEH9oAk+usHFZpnPW7wHzPduZNezGh37mBmodn1bW3Yju2TgGWEjxL3KRrirUQDkp71rwUAw1Qz1K7hxaMWtRt1RaO75QRNhjHWTfNInAQ7CSTiTbSiVY8zw5k0EHPjmjLVnaLksam3g/MweHfxfMsUWwAeFYM9nbPrfSoRPdrB4oH0zyb1nurhS0M6wvDB8/ETVGYZ5kYRMusszAWqNYmj6JfUMG9oz1LvMRHQMadwbMM8qwcCkO5EWEdVlS7vGvACBU13ZFY57FB4JR/xLLecRYMRPQbL1g3MHlWXCgOrmPEf+JkoyLOo/cWuAxMPuiywSw8C686kw/ClpSCrgbGxM+Me+ZURjf9vJ4Cng14M9B4JD8ifV3hXtpOHKVDy+Iq59nhPKtTPCtvNaeMu8GEGhHmWTN0yy51mWLtPGxgbRFVR3qijvN6oMwwJpF4FRvRSk02xa7YQdgC2lGeCABBYGnaqnhCDeEF0Aye5YlWF7zUeHoMBbYIB0HBixTBqRa4OAGCAyvpWSIvWhxeq1GIg3exrw/3NNGSG6avbGCn1LYwKA0yrNNIL8AM+cLRN768sjxrwYE8DdNB9r//HV4DW0bIhXveSbpsZ0s1IHoGc9gu7ll7fSCJivvPgisR5AGNJ1sgY2AKRTq9gsAW2IBKrLTYuUr8VDYOhJP2+EILeVblUwrhQAqGyvuwa3nWc2Jc5iQLnvuY1OsWDkp4FiyPysO+KhhQRpzvnTigEZ1A4MdkzHXtyJVi3l7qOoJMy/CqwFSmqECWDPDZu7ETOhCbpKkjDSk1HbegTNiJm9V3wq6YZ1NXVFjAggletWdjEAwI9CyzsncZz+ovhbAZNbG2D13Gpg5ymc8gnxBi8jWaZZ09E7Nq0l60PMvYmGdF8xGwLdan0OSq1PVgTY6aZ2dT8+xMap6dTc2zM6l5djY1z86k5tnZ1Dw7k5pnZ1Pz7Exqnp1NzbMzqXl2NjXPzqRTPdsU1kn7pSms0zx70iwLzrTtFZVf5A73RvPsoisqv8gd7o3m2UVXVH6RO9wbzbOLrqj8Ine4N5pnF11R+UXucG80zy66ovKL3OHeaJ5ddEXlF7nDvdE8u+iKyi9yh3ujeXbRFZVf5A73Rus5bKpNzbNNtal5tqk2Nc821abm2aba1DzbVJuaZ5tqU/NsU21qnm2qTc2zTbWpebapNjXPNtWm5tmm2pTu2ePhcHGPvkic6fXd4XC4yV1Tr4e3T3nzPF8dDpe5K3rst+4uYSb2/JX3oS2dpimRXSywkyI7LbCpkU327LFfxFEtxnqRONPru/7JY8Indhd+PMRDa29d3/7lNnNFj8OLlNi+3L5RkU0NQ8ZmJC5yscBOiuy0wCZHNtWzr++GL/LDpf8idabnq2G7H/VmJc3Ehk8SDy2ydZkren13yVI+0pAA1JJTw5C1GUmLXCywkyI7LbDpkU31rBWY1Cgh7eI5xJ3p8e33oqG1t+6TtMxnzZQa2uPh5qg2LTUMGZuRuMjFAjspspMCmxHZZM/yzT3CbT/GPeu3e8idqX8Zxy5rnuOb/3mbwnf2itIPYXDTWEoYMjYjcZGLBXZSZKcGNjWyqZ4VX2P5ZbZepM4kpsQ/sT3TcJSIh9aa53E4xIivd87WJZ9P6VCmhiFjMxIXuVhgJ0V2amBTI7usZ4+JZwpmpsc+rLmevUhLf/aKhjz1fJV09r1Bz84V2EmRnRrY0p4twgYJyQBbUyYbCAwSSJS+onQ23SAbzBbYSZGdGtjSbFDiHOwxqYhozfQo7+kYixKcR3zU+PmCPVN6ztzeOdh8gZ0U2amBTY3scrWuPkxJIO4vPJ4OrHlebof1xNMfUjBKypm60UZqXXMGdlJkpwY2NbLL9SkkMg2y8ETsMlXsvr341BkzTeDZjfQpzBrYSZGdGNjUyKb33T6K0z9x2viYeC4IZpJHo4TZrDWxtNBa8xwT+zKtmR4SZxKRzQtDxmYkLnKxwE6K7LTApka2jZFpqk3Ns021qXm2qTY1zzbVpubZptrUPNtUm5pnm2pT82xTbVrSs/y6pZEy9vHinvcOHu9kL2FI4+/6Yzj0lGHG/p9ay7loZ4Fd0LNi8NFDuL9GdtaNBy7eYiS0YOb4WqrR3gK7nGfl53t9F0wIZxbapbS7wC7n2UcZ0v83jIOQ/dYvt//1VoyHG/qXf8gPYcPlyG9/IUYQua0exOg5GZbnT/76SjT49IfDCHrZ/PnqP1/JHm7ZXk8xhzC+lu/xnu0Tx2Wtrt0FdjHPWpdkDNcHDdccv9wOlzn3/x54ZAR2qX9Iq0sxVl6F9qpvIBoNu001f77qm/CRRKq9ngKwa/h35JeKVJ5v9xfYxTz7cmvG9ojhbPzMgH9978Qx5sEOrdfq5dN7cTjSoR0a9GmGN9DN5eQ373V7M8UO7fAv9SrdzWp/gV3FsyKSQ7BuxQFJDJw82qH1Wg2zHg8HENo7M5dprifr9lZDENohXzymjMfbsvYX2FXYQHxUVRvp/zyGQwtaDWz25h9BOvjknrmhHYiKTx7+qvZ6ihvafpc+JA6Y3qz2F9jlz8F6OpqYDviE5/HQwnSg2wfTwcun/+PTytFgh4FdpdYFgAoEbaD6AHaBHXCEhzBelxyw687HrrdPuj3gMzu0r+/+Xe1osMPALt2nwG+IBk5c1cFpuP5Hn97euKe3Zge83B5uTGgv7kGordPbo6Qt3t5qqEPLw5141cemtbfALtl3239M1cWoC4TqJMCUEYfin1tGNNh1cS9PgpmqDlqnEaaMqGqTQ3uroeK4h2FTqq8acO0ssDWPkYnfdiO+iOvq0WAGbTywO/fs4xmgQXltPLC79uzzVf1nYHNo44Gt2bNN+1TzbFNtap5tqk3Ns021qXm2qTY1zzbVpubZptrUPNtUm5pnm2pT82xTbWqebapNzbNNtal5tqk2Nc821abm2aba1DzbVJuaZ5tqU/NsU21qnm2qTc2zTbWpebapNv1/7VTa308roWcAAAAASUVORK5CYII=" /><!-- --> Here, <code>component</code> specifies whether we want to visualize the posterior densities for the transition probability matrix gamma (<code>component = &quot;gamma&quot;</code>) or for the emission distribution probabilities (<code>component = &quot;emiss&quot;</code>), when using <code>component = &quot;emiss&quot;</code> the input variable <code>dep</code> specifies which dependent variable we want to inspect (as the variable <code>p_vocolizing</code> is the first variable in the set, we set <code>dep = 1</code>), <code>col</code> specifies the colors to be used when plotting the lines, <code>dep_lab</code> denotes the label of the dependent variable we are plotting, and <code>cat_lab</code> denotes the labels of the categorical outcomes in the dependent variable. In the plot, the solid line visualizes the posterior density at the group level, while each of the dotted lines visualizes the posterior density of one subject.<br />
+Second, one can plot the transition probabilities obtained with the function <code>obtain_gamma</code> with a riverplot:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" title="1"><span class="co"># Transition probabilities at the group level and for subject number 1, respectively:</span></a>
+<a class="sourceLine" id="cb7-2" title="2"><span class="kw">plot</span>(gamma_pop, <span class="dt">col =</span> <span class="kw">rep</span>(<span class="kw">rev</span>(<span class="kw">brewer.pal</span>(<span class="dv">3</span>,<span class="st">&quot;PiYG&quot;</span>))[<span class="op">-</span><span class="dv">2</span>], <span class="dt">each =</span> m))</a>
+<a class="sourceLine" id="cb7-3" title="3"><span class="kw">plot</span>(gamma_subj, <span class="dt">subj_nr =</span> <span class="dv">1</span>, <span class="dt">col =</span> <span class="kw">rep</span>(<span class="kw">rev</span>(<span class="kw">brewer.pal</span>(<span class="dv">3</span>,<span class="st">&quot;PiYG&quot;</span>))[<span class="op">-</span><span class="dv">2</span>], <span class="dt">each =</span> m))</a></code></pre></div>
+<p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASAAAAEgCAMAAAAjXV6yAAAAb1BMVEUAAAAAADoAAGYAOpAAZrY6AAA6ADo6AGY6ZmY6kLY6kNtmAABmADpmtrZmtv+QOgCQkGaQ2/+2ZgC2///J06bPp0jP6oDP6pvP6rTbkDrbtrbb///zlFvz0KLz0MPz0OP/tmb/25D//7b//9v///+jLPEcAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAFtUlEQVR4nO3djXLaRhRAYdnBbmNcKKRt7KaNMeb9n7G7kgw4Bc7lR4gl58wEKx60Zr+sEJrMyNXCdlb1/QIuPYEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggaBNQFW4s7/cgzpqPtHvbf7JL0UUn49AAm1KIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEgg6PRA46qqBjuHer2rqlExQOH5RIHSYG/jweL1ly/LAVabuflwtJjdTEoBCs8nCjRphtg+4OzTt/QjR2UA/RufTxRo0LJWN5PFLC/PZjM93q7GTeplAH2PzycKNGwO2czcLr68mYgXz4m6LW2WAfQSn08UqNZeHbPzx3rAevzHyft4Cb8UoPB84kCJ+74epX5/b8TzVl6ZzXh5oxyg4HyiQBk6LcB6lPvJuvh7z/XBWwbQP/H5RIHygZkOyTzYLO05TeJpMx+z7aD5r8UAfY/PJwo0TWuvPvFVo/Sn+jzOX0btaSA3re90UchZ7CU+nyjQhu9trBSg8HwEEmhTAkECQQJBAkECQQJBAkECQQJBAkECQQJBAkECQQJBAkECQQJBAkECQQJBAkECQQJBAkECQQJBAkECQQJBAkECQQJBAkECQQJBAkE9AkWf2G8XsoKiO52np7UuBOilb62nbV0i0JmVttpcNlDXVLtZigI6rVQUpkSgY5X2tSkT6CClg2i6Atr3l0d3y3QQylHzIaDjOgnWsSanq8sPwwcBXQbLqrNcLcRo/ljrImzqzns5FaBhprO+4j6uNyM0W5jO/2L7uyCP0KzV18vsBejHYyaCsu1013nnA6K33P/T8Pv6GeocKHQ++vFdZu8PB93VJdAhNE17AHVNdXqgPZfM0/Zz00FMG6ROfqmx34D7gzDNKZhW9Xg13y3Nej8JUHTgnV0pUHTMWFcEFB3r0EoGig5zfMUARXfstEsCij6x3y5oBV1mAkECQQJBAkECQQJBAkECQQJBAkECQQJBAkECQQJBAkECQQJBAkECQQJBAkECQQJBAkECQQJBAkECQQJBAkECQQJBAkECQQJBAkECQQJBAkECQQJBpwcaV1U1gMHyr7IvBSg8nyhQGuxtPKj3Wdv9Q/PhbTlA4flEgSbNEDsGfK5+LWYF/RWfTxRo0KJWN5PFLC/PZjM93rbj/v2tnEPsa3w+UaBhc8jmfebD0WJ2M8mbb+PR4vnTt7V/gzKAnuLziQLV2qtjdv5YD1iP/zgpECg8nzhQ2uG+HmXxeldVjXjeyiuzRKDgfKJAGTotwHqU+8m6+KpygP6MzycKlA/MdHTmwWbpbWyaxNNmPmZXg5YD9DU+nyjQNK29NOjbuBqlP9Xncf4yak8DxQE9xecTBdrwvY2VAhSej0ACbUogSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIOj0QMf8du0L7Kj5FDLH/hIIEggSCBIIEggSCBIIEgg67lLjhC+kw3q8Fos+sd8EggSCBIIEggSCBIIEggSCTg5kawkECQQJBG0Gmrb/TzQ686vpuvmwndjtF35y0xag5V2Er698l9I9EggCoPnj73k55tt4P+RbDf+W1uhDvs9wuQffO1A7J4qAhnlrVt8ZdpCAbiaL5yz2HD+IL60W6H1OFAI95FsxZ+l8o/O7ehnVD8UuoQZoOSd6+s6z2Ki+BXyrkR7rjdVDmTVAyznR03EFLTXS5tUB1dPbXRzIFbTWR6C196CrATr2PegD0NpZ7GqATncWGzWjtZ+DrgfouM9BtkwgSCDoPzrw5VtR9OkbAAAAAElFTkSuQmCC" /><img src="data:image/png;base64,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" /></p>
+<p>Note that graphically displaying the transition probabilities becomes more informative as the number of states increase.<br />
+</p>
+</div>
+<div id="determining-the-number-of-hidden-states" class="section level3">
+<h3>Determining the number of hidden states</h3>
+<p>The first step in developing a HMM is to determine the number of states <span class="math inline">\(m\)</span> that best describes the observed data, and is a model selection problem. When modelling, for example, behavior, the task is to define the states by clusters of observed behavioral outcomes that provide a reasonable, theoretically interpretable, description of the data. We suggest using a combination of the Akaike Information Criterion (AIC) and the theoretical interpretability of the estimated states to choose between models<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>. In the example dataset, the 2, 3 and 4 state model result in an AIC of 3279, 3087, and 2959, respectively. According to model fit indices, the 4 state model is clearly the best model<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a>. Let’s inspect the composition of the states for the 4 state model, and the transition probabilities:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" title="1"><span class="kw">summary</span>(out_4st)</a>
+<a class="sourceLine" id="cb8-2" title="2"><span class="co">#&gt; State transition probability matrix </span></a>
+<a class="sourceLine" id="cb8-3" title="3"><span class="co">#&gt;  (at the group level): </span></a>
+<a class="sourceLine" id="cb8-4" title="4"><span class="co">#&gt;  </span></a>
+<a class="sourceLine" id="cb8-5" title="5"><span class="co">#&gt;              To state 1 To state 2 To state 3 To state 4</span></a>
+<a class="sourceLine" id="cb8-6" title="6"><span class="co">#&gt; From state 1      0.897      0.030      0.054      0.017</span></a>
+<a class="sourceLine" id="cb8-7" title="7"><span class="co">#&gt; From state 2      0.045      0.811      0.056      0.085</span></a>
+<a class="sourceLine" id="cb8-8" title="8"><span class="co">#&gt; From state 3      0.200      0.094      0.651      0.050</span></a>
+<a class="sourceLine" id="cb8-9" title="9"><span class="co">#&gt; From state 4      0.022      0.238      0.014      0.722</span></a>
+<a class="sourceLine" id="cb8-10" title="10"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb8-11" title="11"><span class="co">#&gt;  </span></a>
+<a class="sourceLine" id="cb8-12" title="12"><span class="co">#&gt; Emission distribution for each of the dependent variables </span></a>
+<a class="sourceLine" id="cb8-13" title="13"><span class="co">#&gt;  (at the group level): </span></a>
+<a class="sourceLine" id="cb8-14" title="14"><span class="co">#&gt;  </span></a>
+<a class="sourceLine" id="cb8-15" title="15"><span class="co">#&gt; $p_vocalizing</span></a>
+<a class="sourceLine" id="cb8-16" title="16"><span class="co">#&gt;         Category 1 Category 2 Category 3</span></a>
+<a class="sourceLine" id="cb8-17" title="17"><span class="co">#&gt; State 1      0.011      0.977      0.011</span></a>
+<a class="sourceLine" id="cb8-18" title="18"><span class="co">#&gt; State 2      0.738      0.043      0.213</span></a>
+<a class="sourceLine" id="cb8-19" title="19"><span class="co">#&gt; State 3      0.141      0.722      0.131</span></a>
+<a class="sourceLine" id="cb8-20" title="20"><span class="co">#&gt; State 4      0.874      0.056      0.065</span></a>
+<a class="sourceLine" id="cb8-21" title="21"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb8-22" title="22"><span class="co">#&gt; $p_looking</span></a>
+<a class="sourceLine" id="cb8-23" title="23"><span class="co">#&gt;         Category 1 Category 2</span></a>
+<a class="sourceLine" id="cb8-24" title="24"><span class="co">#&gt; State 1      0.236      0.764</span></a>
+<a class="sourceLine" id="cb8-25" title="25"><span class="co">#&gt; State 2      0.077      0.923</span></a>
+<a class="sourceLine" id="cb8-26" title="26"><span class="co">#&gt; State 3      0.351      0.649</span></a>
+<a class="sourceLine" id="cb8-27" title="27"><span class="co">#&gt; State 4      0.116      0.884</span></a>
+<a class="sourceLine" id="cb8-28" title="28"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb8-29" title="29"><span class="co">#&gt; $t_vocalizing</span></a>
+<a class="sourceLine" id="cb8-30" title="30"><span class="co">#&gt;         Category 1 Category 2 Category 3</span></a>
+<a class="sourceLine" id="cb8-31" title="31"><span class="co">#&gt; State 1      0.908      0.015      0.075</span></a>
+<a class="sourceLine" id="cb8-32" title="32"><span class="co">#&gt; State 2      0.019      0.971      0.010</span></a>
+<a class="sourceLine" id="cb8-33" title="33"><span class="co">#&gt; State 3      0.404      0.438      0.130</span></a>
+<a class="sourceLine" id="cb8-34" title="34"><span class="co">#&gt; State 4      0.075      0.869      0.054</span></a>
+<a class="sourceLine" id="cb8-35" title="35"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb8-36" title="36"><span class="co">#&gt; $t_looking</span></a>
+<a class="sourceLine" id="cb8-37" title="37"><span class="co">#&gt;         Category 1 Category 2</span></a>
+<a class="sourceLine" id="cb8-38" title="38"><span class="co">#&gt; State 1      0.038      0.962</span></a>
+<a class="sourceLine" id="cb8-39" title="39"><span class="co">#&gt; State 2      0.036      0.964</span></a>
+<a class="sourceLine" id="cb8-40" title="40"><span class="co">#&gt; State 3      0.077      0.923</span></a>
+<a class="sourceLine" id="cb8-41" title="41"><span class="co">#&gt; State 4      0.947      0.053</span></a>
+<a class="sourceLine" id="cb8-42" title="42"></a>
+<a class="sourceLine" id="cb8-43" title="43">m &lt;-<span class="st"> </span><span class="dv">4</span></a>
+<a class="sourceLine" id="cb8-44" title="44"><span class="kw">plot</span>(<span class="kw">obtain_gamma</span>(out_4st), <span class="dt">cex =</span> <span class="fl">.5</span>, <span class="dt">col =</span> <span class="kw">rep</span>(<span class="kw">rev</span>(<span class="kw">brewer.pal</span>(<span class="dv">5</span>,<span class="st">&quot;PiYG&quot;</span>))[<span class="op">-</span><span class="dv">3</span>], <span class="dt">each =</span> m))</a></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+<p>We can see that we have a state in which the patient speaks and the therapist is silent (state 1), a state in which the patient is silent and the therapist speaks (state 2), a state in which both the patient and therapist speak (state 3) and a state in which the therapist speaks but does not look at the patient (in contrast to the looking behavior in all other states), and the patient is silent. In addition, all states are quite stable as the probability of remaining in the same state is above .6 for all states.</p>
+</div>
+<div id="determining-the-most-likely-state-sequence" class="section level3">
+<h3>Determining the most likely state sequence</h3>
+<p>Given a well-fitting HMM, it may be of interest to determine the actual <em>sequence</em>, or order of succession, of hidden states that has most likely given rise to the sequence of outcomes as observed in a subject. One can either use local decoding, in which the probabilities of the hidden state sequence are obtained simultaneously with the model parameters estimates, or the well-known Viterbi algorithm <span class="citation">(Viterbi 1967; Forney Jr 1973)</span>. In local decoding, the most likely state is determined separately at each time point <span class="math inline">\(t\)</span>, in contrast to the Viterbi algorithm in which one determines the joint probability of the complete sequence of observations <span class="math inline">\(O_{1:T}\)</span> and the complete sequence of hidden states <span class="math inline">\(S_{1:T}\)</span>.<br />
+In the package, local decoding can be achieved by saving the sampled hidden state sequence at each iteration of the Gibbs sampler, by setting the input variable <code>return_path = TRUE</code> for the function <code>mHMM</code>. This will result in very large output files, however. Global decoding can be performed by using the function <code>vit_mHMM</code>:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" title="1">state_seq &lt;-<span class="st"> </span><span class="kw">vit_mHMM</span>(out_2st, <span class="dt">s_data =</span> nonverbal)</a>
+<a class="sourceLine" id="cb9-2" title="2"> <span class="kw">head</span>(state_seq)</a>
+<a class="sourceLine" id="cb9-3" title="3"><span class="co">#&gt;      Subj_1 Subj_2 Subj_3 Subj_4 Subj_5 Subj_6 Subj_7 Subj_8 Subj_9</span></a>
+<a class="sourceLine" id="cb9-4" title="4"><span class="co">#&gt; [1,]      1      2      2      2      1      2      1      1      1</span></a>
+<a class="sourceLine" id="cb9-5" title="5"><span class="co">#&gt; [2,]      1      2      2      2      1      2      1      1      1</span></a>
+<a class="sourceLine" id="cb9-6" title="6"><span class="co">#&gt; [3,]      1      2      2      2      2      2      1      1      1</span></a>
+<a class="sourceLine" id="cb9-7" title="7"><span class="co">#&gt; [4,]      1      2      2      2      2      2      1      1      1</span></a>
+<a class="sourceLine" id="cb9-8" title="8"><span class="co">#&gt; [5,]      1      2      2      2      2      2      2      1      1</span></a>
+<a class="sourceLine" id="cb9-9" title="9"><span class="co">#&gt; [6,]      1      2      2      2      2      1      2      1      1</span></a>
+<a class="sourceLine" id="cb9-10" title="10"><span class="co">#&gt;      Subj_10</span></a>
+<a class="sourceLine" id="cb9-11" title="11"><span class="co">#&gt; [1,]       1</span></a>
+<a class="sourceLine" id="cb9-12" title="12"><span class="co">#&gt; [2,]       1</span></a>
+<a class="sourceLine" id="cb9-13" title="13"><span class="co">#&gt; [3,]       1</span></a>
+<a class="sourceLine" id="cb9-14" title="14"><span class="co">#&gt; [4,]       1</span></a>
+<a class="sourceLine" id="cb9-15" title="15"><span class="co">#&gt; [5,]       1</span></a>
+<a class="sourceLine" id="cb9-16" title="16"><span class="co">#&gt; [6,]       1</span></a></code></pre></div>
+<p>The function returns the hidden state sequence for each subject in a matrix, where each row represents a point in time and each column represents a subject. We can inspect the obtained hidden state sequence by for example plotting it together with the observed data. Below, the first 5 minutes of the first couple is plotted again, with the addition of the estimated state sequence:</p>
+<p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAArMAAAGACAMAAACJPxq3AAABblBMVEUAAAAAADEAADoAAFcAAGYAMXoAOjoAOpAAZrYckJkxAAAxero1kK86AAA6ADo6AGY6OgA6Ojo6kNs7kLxIkLxKkKtKkLlKkLxXm9lmAABmADpmZmZmkJBmtrZmtv9qkLx6MQB6utmQOgCQZgCQkGaQtpCQ2/+bVwCgzbmg2dmh12qmvduo15Gs156w4vWxveexz7Sx14Wx1560vee1vda1veG1veS1vee2ZgC2tma225C2/7a2//+6ejG77c679O27+vfE157H2aTH2dnX4vXZm1fZzbnZ05bZ2ZvZ2aTZ2dnbkDrb///e0NHf2dnf2+Xh8OXh+Lji7c7i9O3i+vfm05bm2dnno8/no9vpo8np4ujso9vs4vDto8Pto9Lto9vu4vXv1cjv3Ojv4vLv4vX38OX3+Lj47c749O34+vf6sn/+skz+sm7+snz+so3/tmb/25D/5Ir/7aD/7bH/7cH/8qv//NH//7b//9v////vIALaAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAVyUlEQVR4nO2di7vjRBnG43p0j8pZ3HKzwBassuANL6BbAdfjBdDNKiAX78pNdkHYFDls2//ezEwmmaSTSdpkcjJv3/c8T06btHnnS36dTqaZ+aINRYWl6LwLQFE7isxSoYnMUqGJzFKhicxSoYnMUqGJzFKhicxSoYnMUqGJzFKhicxSoYnMUqGJzFKhicxSoYnMUqGJzFKhicxSoYnMUqGJzFKhicxSoYnMUqGJzFKhicxSoYnMUqGJzFKhicxSoYnMUqGJzFKhicxSoYnMUqGJzFKhicxSoYnMUqGJzFKhicxSoYnMUqGJzFKhicxSoYnMUqHpnJmNLLphW9m3YEywA7FDMzCkLexvDGEMYwIdCJmFNIEOhMxCmkAHQmYhTaADIbOQJtCBkFlIE+hAyCykCXQgZBbSBDoQMgtpAh0ImYU0gQ6EzEKaQAdCZiFNoAMhs5Am0IGEwGzjLT296dxOdd8h9heI44YqMltvH30311bBVtP0UB69kD5KZsbq0pNMy3tfaDI+P2b/l6sS4nouo9ssLt4sVmbhraaWMFfTifSwbtxd0T8KlYu2fry+ZOaJqZcs6sZZVEBmk0hEu7hwtRy37SCspg1HcDNSZqNj8d8kQ4fnZLYnuZitL5lxYhzSzDoEyOxCHrX1/LiR2aTxU78ZKbNfviRO/BiZrS+ZcWIcOkhmi2OyPImi9Ngt0i+kmX4Sp0/0QUmiSRIos8exCFKSkciIsvAyQhIdZfZAgvCLaCI2rqZXppGq8aLowrfdtZ5dLmbrS2bAurz0xElWwvyEqNOkiho7i4rHbHqo9LGR5098umPdUBAPlifFJzlYZlVoKQviC3c1PS7Vs3qdsXGScjDbKBDSYyCOwyKNPYl6Z7a2ZMaJSTlWpSxOSHGaGosKyKz8ZEsWZdwPXxVr9EEQuBqgBsvsJhbfIBdvrucyogtXDWbzdcbGSRJ9Y1Mcg/SAiGPS2Lq0y8lsbcmME6OqjfSF+QkxTtMkUfVtbVERmd3IqxTjGiyJsg9uIsNWh0BtCZZZgURKhoolXRrM5uuMjZejyQ0NgiJChZ70z2xdybKiR7JmnSnv0gnJTtNl2VZwFBWU2VTp94lqDqSf7eeyejbJ+hQBmBVFz8lIY9ti1nyQfsk+cembZRBiX8zWlUwrPTFLeaEmmM1PSHGa0qJedRYVj1ldi2bfSvKpbhtsnaGAmd0sJjvUs2nV96Wbw9SzdSUzTkzBrLY3TpOspSHr2dpfYvTlaaLqWRlvkjfqKx1Bo2a2IcTlpa/v0J7dLL86K4GgEIr3Yra2aIpZe8mME6PaswvRntXXZ8VpmhiXH9aihsqslB2nJFIdLRMj/uyJitu47hgzs/XKzv4iKl2dF78fWfsNNk+qD7EGoUO/gaNkj9eXzDgxy5PUNu83ECekfJoWzqICMqt+IpQBimMXi8cC04XunzU4DZrZ1bToBc04cfXP/m56XAJBdHoe/bz5AOxUssfrS2acmOXJoyfZVYU+Ifo0yaKunEVFZLZfwZhYPVp8aLubbMnouWmvhMy2FYxJxUNy0+KX0k4mNdqR2UpRyWyTYEyqHkmp18+TiV271rPlopLZJsGYQAdCZiFNoAMhs5Am0IGEwCzH1vTisZ84tqadqsz+NdfeY2vWc+Nm2lqdH7P/zbV1W7s5dKUkx9CUHpn9SqEqsz2Nn3EJkNm2Y2vWc3F3ZuS8a34TKrMtPfaTg9kXexo/4xIgs23H1mS/Yjd1qpPZ7ZLVM/tkT+NnXMJjtv3YGqnGG5vGzaz1V1r70JQv9HZnQT2z2W+3Qt3Gz7iEx+xOY2vk7Rhu41Ezu8somiGYTdsG/YyfcQmQ2V3G1si7jNwaM7M1o2jsQ1MGYfZGT+NnXEJkdrPD2JrGS7BRM1szimZjHZoyDLObfsbPuATK7Kbd2JrmWjYEZrdG0diHpgzG7KaH8TMu4TG7w9iauAWyATC7NYrGPjRlCGbFYAihzuNnXAqW2R7G1sSt7moa4+9gzvZs3dCUHpltGFvTw/gZl0JlVqrb2Jpy/0GtxvgzvbvfoGZoSn/MOvRiT+NnXAJktu3YmljVE6Ptn3VooYo+qemftQ9N+WK/IxLsutHT+Bmnh2Vd6Mz2KxSTZBhm80fdxs+08yhEZrFMsqEpX/PpobU3szsM9SGzTQIwUUNTBg6k2/iZdh6FyCykCXQgZBbSBDoQMgtpAh0ImYU0gQ6EzEKaDDIe7Mn6Pm9bp0D70TXGpKBktkkwJj0y+71CVWblL3TWn2A7M6sfktkmwZgMyKy1n5XMCsHghMdsNlim+O32OB9Ro16o1+kfePNhN2qoTTHkJtY/Ss9cQ3HILKTJkG0DOdt3NpJGD6fRI2qk8nV6ZE0+7EatyDfogTk5sxeu3rAMxSGzkCbDMKsuzMTNscZIGrlJj6jJHhf/xW2/pRdn9wHn/7P7SvVQnBuWoThkFtJkwHpWD1lK1IhnPWv+5fwe+2LdLG+q5iOg8j4CcSu4HpiTMzsT945t3SJOZiFNBmRWfnPrkTRqwMImH1EjVKzLmDVHQJWY1QNzKsxWh+KQWUiTIZmNxTiFbCRNUadOKoOCCmZLI6C269mNcQ3GerZZMCbD/KaQ1bMXb5ZG0gjpUSP6sfpvjAZLLG2DvIurwmx1KA6ZhTQZJBDdnp0Vg5okWTJF76SYAiVfV9Sz2bCbMrP5wJwKs+w3cAnGZBhmi99u80FNZv+sHLy22RTrivZsNuymwqwemFNltjIUh8xCmgAGkpBZq2BMoAKpDsUhs5AmWIFUhuKQWUgT6EDILKQJdCBkFtIEOhAyC2kCHQiZhTSBDoTMQppAB0JmIU2gAyGzkCbQgZBZSBPoQMgspAl0IMEw+/Kdzz++87l1cffs7mdn6eLTmu31i+qKNyvbPznL9t30xl0cP6rdXmO2i6PcRSmQLkV1L+oCqZaoi+1bLfFowayc4TkqZ+jdK5lwa3syS2YdeLSsZ/U4H629ErO2tiezZNaBB5klswfH7A7JhK0zlJFZMjsws7skEyazZHYEzO6UTJjMktkRMLtTMmEyS2ZHw2zLZMJklsyOhtmWyYTJLJkdAbM7JRMms2R2BMzulEyYzJLZ82R2n2TC1pynZJbM+mG2D9nz9JJZMjtGZl15esksmfXI7PIku8HL2jB1yZGnl/fPhuDB+2eb7GHOApnt6kFmIU2gAyGzkCbQgZBZSBPoQMgspAl0IGQW0gQ6EDILaQIdCJmFNIEOhMxCmkAHQmYhTaADIbOQJtCBkFlIE+hAyCykCXQgZBbSBDoQMgtpAh0ImYU0gQ6EzEKaQAdCZiFNoAMhs5Am0IGQWUgT6EDILKQJdCDBMPvSQ6fv3H/9oesPPv3h+x++97Zc3Hro+gP3peuyf2Jxmm1qt6iueCV7dPva688+Zu7WWMgCvH/LZvbuM69fe/1nv82e3v7pD9/IdibW3dJFvadmx7UL5Vgp6i3ne54qnop/p+a75WEUm36ZFdDc7e1inXmEs8WpEfetB+45NUpxKl/84NPpInvcHJn1ZJVX/LElHmSWzIIwa8tV0yQ5kefMeNbqXWSWzPZXz1bn6GpSW0qb7cksmXXgQWbJLCyzag5ZMe9xPhNinD443qhJEmd52yBWMyZ2yVtDZslsH8yu5xLPizfzGWfFHMhyVu/8cd6ejfX8s/vlrSGzZLYPZgWHAtHShN5Cq4evbvTM3hmzxTzf++WtIbNkthdmBYQpqpUMCkpJFBnMrucd8ymQWTLbC7OiDZA2DYpMNXpz2oA9es6sZ2XihC55a8gsme2H2eTo+ZTBrXpW/jfbBsuTrvnByCyZ7YfZ1fSRlL2t9qwEMinaBrJlUGZ217w1ZJbM9sPsZiF7tkr9Buv5sapio0ne16XQ7JK3hsyS2Z6YTdT08tX+2VhMVr8QFa9gdj1XP/pe6ZC3hsyS2f2Y7Vvt89aQWTLrwGOUeWtg7gjl/bNdPfZhdv9cNaaYtyZwj6CY9S4yG4IHmW2yhzkLZLarB5mFNIEOhMxCmkAHQmYhTaADIbOQJtCBkFlIE+hAyCykCXQgZBbSBDoQMgtpAh0ImYU0gQ6EzEKaQAdCZiFNoAMhs5Am0IGQWUgT6EDILKQJdCBkFtIEOhAyC2kCHQiZhTSBDoTMQppABxIMsy/f+fzjO5/bF+bjT87unt39tPqiu2eNbxSLN8Vi+93mftTW+u31pdSOH6UWn525XmRZNO7YEog9xvQItduPvRzGwfmo9o1NFulh/OxMhlQ5WXfPKoG+1RIPMktmAZldqMHix6V1ck4um/JpaTvkACGzZNaBRxtmsznjTEybmW0rMktmfTFbnoqTzJLZAJg15/U2mM1nnMseSGbjbjlAyCyZ7YVZez2bz+ypHwhm40jnU9gvBwiZJbN9MCvB3GI2n0HZnEo5yTIv7Z0DhMyS2Y7Mqn6DUjNVM1uZqT5drqaXo65z05NZMtuRWcv1VpnZfPp5OW3yhScudcwBQmbJrG9my/XsRG5lPUtmx8mstT1r5LTbLwcImSWz/pi19xuIfoIuOUDILJn1wGx+XWbtn03hXXXIAUJmyWw3ZvtS+xwgZJbMOvBgDpDgTaAD6crs/vlAmAMkcI9gmfUiMhuCB5ltsoc5C2S2qweZhTSBDoTMQppAB0JmIU2gAyGzkCbQgZBZSBPoQMgspAl0IGQW0gQ6EDILaQIdCJmFNIEOhMxCmkAHQmYhTaADIbOQJtCBkFlIE+hAyCykCXQgZBbSBDoQMgtpAh0ImYU0gQ6EzEKaQAcSDLMvPXT9gfuuby0efPrD99O/996Wi9vX/mR7Ue2iuuIp8+lpvltzcfvZxyxvbLsQ+/zb1j7V4t1nXr/2hm3De2/fsjqe1r/7lWJD9v7KIXvn/lYHx7S4VX33PfppxSBfW7u41WBbLL7TEg8yS2ZBmLXl/WiSnBRxZjxr9S4yS2Z7YtaS96NJbSlttiezZNaBh5PZmuk3a0RmyewImDXyfqiHAuJ8Vrk4az0s1CQxWdsgVrPPdckBQmbJ7N7MGvXsen6s1uezd4r5ZOUMyfnjvD0b67k898sBQmbJ7L7MlvJ+iAnmU0RLkyMLrR6+utGzJGfMFnMm75cDhMyS2T2Y3c77ISBMUa3MRq+URJHB7HrecW56Mktm92DWNk/ysVhdZP24lCGYNmCPnjPrWTkJfZccIGSWzPbDbHL0fMrgVj0r/5ttg+VJ11xLZJbM9sPsavpIyt5We1YCmRRtA9kyKDO7aw4QMktm+2E2beSKS7JSv8F6fqyq2LTpq/u6FJpdcoCQWTLbE7OJmqq72j8bi4m/F6LiFcyu5+ry7UqHHCBklszuzqwPtc8BQmbJrAMP5gAJ3gQ6kH2Y3T/vhynmAAncIyhmvYvMhuBBZpvsYc4Cme3qQWYhTaADIbOQJtCBkFlIE+hAyCykCXQgZBbSBDoQMgtpAh0ImYU0gQ6EzEKaQAdCZiFNoAMhs5Am0IGQWUgT6EDILKQJdCBkFtIEOhAyC2kCHQiZhTSBDoTMQppAB0JmIU2gAyGzkCbQgZBZSBPoQIJh9vc/ee3HP3hta/Gjv/zn3+nfv/6eLT6wvah2UV3xa/Ppq8ZujcU/f2V5Y9uF2Oeft/fZtPjA6lhTQLH4Q/E0e3/lkMkomg/Oq1uH1nj39/XTikFD2aovd56T37TEo0dmV9MoitRscuaw8MQ9Yz2ZJbPnxqyaGWmhJvwuVjdlWSCzZPbcmF3IOcHFFPZklswGwazKtyAkpp65eDPLDJI9iSuThrvtySyZddLZX9tAQ6tmQiwyg6gHairlVvZklsw66eztGkxUqfISTE49a2QGyaaXaz8vIpkls046++zrWs8j4xpMZwbJZqU3k4a47cksmXXS2XP/7EKlBjMzg6hpEWtmRiSzZPa8mNW1qMy0MCtlBnGmICWzZPa8mNX9BomqZ83MIM7+LjJLZs+L2RRQkYMhkclAJhsjM8gkS1nTPg8jmSWzTjr7/e1WcrlI8dWZQeQT2T9r7TYgs2T2HJndT2SWzJJZMktm/Yr3z4bgwftnm+xhzgKZ7epBZiFNoAMhs5Am0IGQWUgT6EDILKQJdCBkFtIEOhAyC2kCHQiZhTSBDoTMQppAB0JmIU2gAyGzkCbQgZBZSBPoQMgspAl0IGQW0gQ6EDILaQIdCJmFNIEOhMxCmkAHQmYhTaADGSezFt2wrexbMCbYgdihGRjSFhqkSDAmBxgImQ3c5AADIbOBmxxgIGQ2cJMDDITMBm5ygIGQ2cBNDjAQMhu4yQEGQmYDNznAQMhs4CYHGAiZDdzkAAMZIbMU5RSZpUITmaVCE5mlQhOZpUITmaVCE5mlQhOZpUITmaVCE5mlQhOZpUITmaVC0/iYXd5rzebco9bzKIomnk02cZay2rMWIp+7T8nk29GxX5PlyQ4Wo2N2NbVnIO9P63nKUuz7LMRpGIl/aJPIN7PLS/4/eUkaxGra9oyMjdkkinwzuzyZbRRTHrWaTsSnw/MHQ1SCvplNfJ8PcZzEt17rMzIyZpNoMsAxkk4DfHH7Zza++C3fzMa+Y9i5Kh8Zs5tBPtdCiwFsYt+fi/Rke2/PLi57b/0nR89Pd/A4VGYT/xdhifcLPfGd6pvZ1VQYLLxGEov2YPsvpQNlNvF9CSa1nvsFKk53772elfJ7UtT3UWuPw2R2gFpW+XhtHMhm4DDMqutWX1JXX609DpLZeCBkfZ/qbMJLnx6Z/HZ4qVPe2uMQmY0HOMuK1gE+f77r2SECWU138jhAZpcnQ9SygiXV7+jfx6+BaPn7vQaTDfP2B+sAmc2+Un33Qy2G+db2354dIpBkl/608TFLUW6RWSo0kVkqNJFZKjSRWSo0kVkqNJFZKjSRWSo0kVkqNJFZKjSRWSo0kVkqNJFZKjSRWSo0kVkqNJFZKjSRWSo0kVkqNJFZKjSRWSo0kVkqNJFZKjSRWSo0kVkqNJFZKjSRWSo0kVkqNJFZL1IJilIdPT91zXW1cm21bkwGmANs5CKz3uRlzlYn5AciMutNZNaTyKw3KWYFZMuTKyIvi0g2KFOTFRNXiq2rqdiqUCy90twoWV1NH003XLyZ70G8bogJQ8clMutNJrMy8+PRCzJzgMh4oedtVliKrWo63NIrzY0ZszP5X+9BzsGdHBy0ZNabTGYnG72YyQyNemZoheUkz7xQeWWx0WQ238NAqdTGJjLrTSazs02+ULlsMkYVgrO8nVp6pbnR/J/vwX9u4FGKzHpTHbNmtpn9mM33IDOkH1rTgMz6k7OezdShntVaDJC4d1wis95Uw2ypt2oHZifldaVdHJbIrDfVMKu6CLLasTWzIg1p2hJQ7Oo9yAp3iATp4xKZ9aY6ZmXvanbx1JpZ+WvwlfT/QvfPij0kA+SMGp/ILBWayCwVmsgsFZrILBWayCwVmsgsFZrILBWayCwVmsgsFZr+D1qkXfjD4wraAAAAAElFTkSuQmCC" /><!-- --></p>
+</div>
+<div id="checking-model-convergence-and-label-switching" class="section level3">
+<h3>Checking model convergence and label switching</h3>
+<p>When using Bayesian estimation procedures, it is strongly advised to check model convergence and label switching. That is, one should check if the algorithm reaches the same solution when a set of different (but often conceptually similar) starting values are used, and if label switching is not a problem. With label switching, the label (i.e., which state represents what) ordering of the states switches over the iterations of the estimation algorithm. For example, what started out as state 1, now becomes state 2. One can check model convergence and label switching visually by inspecting the trace plots of parameters of a set of identical models that used varying starting values. Trace plots are plots of the sampled parameter values over the iterations. First, we fit the model with 2 states again, but with different starting values:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb10-1" title="1"><span class="co"># specifying general model properties</span></a>
+<a class="sourceLine" id="cb10-2" title="2">m &lt;-<span class="dv">2</span></a>
+<a class="sourceLine" id="cb10-3" title="3">n_dep &lt;-<span class="st"> </span><span class="dv">4</span></a>
+<a class="sourceLine" id="cb10-4" title="4">q_emiss &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">3</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">2</span>)</a>
+<a class="sourceLine" id="cb10-5" title="5"></a>
+<a class="sourceLine" id="cb10-6" title="6"><span class="co"># specifying different starting values</span></a>
+<a class="sourceLine" id="cb10-7" title="7">start_TM &lt;-<span class="st"> </span><span class="kw">diag</span>(.<span class="dv">8</span>, m)</a>
+<a class="sourceLine" id="cb10-8" title="8">start_TM[<span class="kw">lower.tri</span>(start_TM) <span class="op">|</span><span class="st"> </span><span class="kw">upper.tri</span>(start_TM)] &lt;-<span class="st"> </span><span class="fl">.2</span></a>
+<a class="sourceLine" id="cb10-9" title="9">start_EM_b &lt;-<span class="st"> </span><span class="kw">list</span>(<span class="kw">matrix</span>(<span class="kw">c</span>(<span class="fl">0.2</span>, <span class="fl">0.6</span>, <span class="fl">0.2</span>,</a>
+<a class="sourceLine" id="cb10-10" title="10">                            <span class="fl">0.6</span>, <span class="fl">0.2</span>, <span class="fl">0.2</span>), <span class="dt">byrow =</span> <span class="ot">TRUE</span>,</a>
+<a class="sourceLine" id="cb10-11" title="11">                        <span class="dt">nrow =</span> m, <span class="dt">ncol =</span> q_emiss[<span class="dv">1</span>]), <span class="co"># vocalizing patient</span></a>
+<a class="sourceLine" id="cb10-12" title="12">                 <span class="kw">matrix</span>(<span class="kw">c</span>(<span class="fl">0.4</span>, <span class="fl">0.6</span>,</a>
+<a class="sourceLine" id="cb10-13" title="13">                          <span class="fl">0.4</span>, <span class="fl">0.6</span>), <span class="dt">byrow =</span> <span class="ot">TRUE</span>, <span class="dt">nrow =</span> m,</a>
+<a class="sourceLine" id="cb10-14" title="14">                        <span class="dt">ncol =</span> q_emiss[<span class="dv">2</span>]), <span class="co"># looking patient</span></a>
+<a class="sourceLine" id="cb10-15" title="15">                 <span class="kw">matrix</span>(<span class="kw">c</span>(<span class="fl">0.6</span>, <span class="fl">0.2</span>, <span class="fl">0.2</span>,</a>
+<a class="sourceLine" id="cb10-16" title="16">                          <span class="fl">0.2</span>, <span class="fl">0.6</span>, <span class="fl">0.2</span>), <span class="dt">byrow =</span> <span class="ot">TRUE</span>,</a>
+<a class="sourceLine" id="cb10-17" title="17">                        <span class="dt">nrow =</span> m, <span class="dt">ncol =</span> q_emiss[<span class="dv">3</span>]), <span class="co"># vocalizing therapist</span></a>
+<a class="sourceLine" id="cb10-18" title="18">                 <span class="kw">matrix</span>(<span class="kw">c</span>(<span class="fl">0.4</span>, <span class="fl">0.6</span>,</a>
+<a class="sourceLine" id="cb10-19" title="19">                          <span class="fl">0.4</span>, <span class="fl">0.6</span>), <span class="dt">byrow =</span> <span class="ot">TRUE</span>, <span class="dt">nrow =</span> m,</a>
+<a class="sourceLine" id="cb10-20" title="20">                        <span class="dt">ncol =</span> q_emiss[<span class="dv">4</span>])) <span class="co"># looking therapist</span></a>
+<a class="sourceLine" id="cb10-21" title="21"></a>
+<a class="sourceLine" id="cb10-22" title="22"><span class="co"># Run a model identical to out_2st, but with different starting values:</span></a>
+<a class="sourceLine" id="cb10-23" title="23"><span class="kw">set.seed</span>(<span class="dv">9843</span>)</a>
+<a class="sourceLine" id="cb10-24" title="24">out_2st_b &lt;-<span class="st"> </span><span class="kw">mHMM</span>(<span class="dt">s_data =</span> nonverbal, </a>
+<a class="sourceLine" id="cb10-25" title="25">                      <span class="dt">gen =</span> <span class="kw">list</span>(<span class="dt">m =</span> m, <span class="dt">n_dep =</span> n_dep, <span class="dt">q_emiss =</span> q_emiss), </a>
+<a class="sourceLine" id="cb10-26" title="26">                      <span class="dt">start_val =</span> <span class="kw">c</span>(<span class="kw">list</span>(start_TM), start_EM),</a>
+<a class="sourceLine" id="cb10-27" title="27">                      <span class="dt">mcmc =</span> <span class="kw">list</span>(<span class="dt">J =</span> <span class="dv">1000</span>, <span class="dt">burn_in =</span> <span class="dv">200</span>))</a></code></pre></div>
+<p>The group level parameter estimates of the emission probabilities and the transition probability matrix at each iteration of the estimation algorithm are stored in the objects <code>emiss_prob_bar</code> and <code>gamma_prob_bar</code>, respectively. The subject level parameter estimates are stored in the object <code>PD_subj</code>, where PD is an abbreviation for posterior density. If we, for example, want to inspect the trace plots for the emission probabilities for looking behavior of the patient at the group level, we use the following code:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" title="1"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(m,q_emiss[<span class="dv">2</span>]))</a>
+<a class="sourceLine" id="cb11-2" title="2"><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>m){</a>
+<a class="sourceLine" id="cb11-3" title="3">  <span class="cf">for</span>(q <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>q_emiss[<span class="dv">2</span>]){</a>
+<a class="sourceLine" id="cb11-4" title="4">     <span class="kw">plot</span>(<span class="dt">x =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">1000</span>, <span class="dt">y =</span> out_2st<span class="op">$</span>emiss_prob_bar[[<span class="dv">2</span>]][,(i<span class="dv">-1</span>) <span class="op">*</span><span class="st"> </span>q_emiss[<span class="dv">2</span>] <span class="op">+</span><span class="st"> </span>q], </a>
+<a class="sourceLine" id="cb11-5" title="5">          <span class="dt">ylim =</span> <span class="kw">c</span>(<span class="dv">0</span>,<span class="fl">1.4</span>), <span class="dt">yaxt =</span> <span class="st">&#39;n&#39;</span>, <span class="dt">type =</span> <span class="st">&quot;l&quot;</span>, <span class="dt">ylab =</span> <span class="st">&quot;Transition probability&quot;</span>,</a>
+<a class="sourceLine" id="cb11-6" title="6">          <span class="dt">xlab =</span> <span class="st">&quot;Iteration&quot;</span>, <span class="dt">main =</span> <span class="kw">paste</span>(<span class="st">&quot;Patient&quot;</span>, Look_lab[q], <span class="st">&quot;in state&quot;</span>, i), <span class="dt">col =</span> <span class="st">&quot;#8da0cb&quot;</span>) </a>
+<a class="sourceLine" id="cb11-7" title="7">    <span class="kw">axis</span>(<span class="dv">2</span>, <span class="dt">at =</span> <span class="kw">seq</span>(<span class="dv">0</span>,<span class="dv">1</span>, <span class="fl">.2</span>), <span class="dt">las =</span> <span class="dv">2</span>)</a>
+<a class="sourceLine" id="cb11-8" title="8">    <span class="kw">lines</span>(<span class="dt">x =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">1000</span>, <span class="dt">y =</span> out_2st_b<span class="op">$</span>emiss_prob_bar[[<span class="dv">2</span>]][,(i<span class="dv">-1</span>) <span class="op">*</span><span class="st"> </span>q_emiss[<span class="dv">2</span>] <span class="op">+</span><span class="st"> </span>q], <span class="dt">col =</span> <span class="st">&quot;#e78ac3&quot;</span>)</a>
+<a class="sourceLine" id="cb11-9" title="9">    <span class="kw">legend</span>(<span class="st">&quot;topright&quot;</span>, <span class="dt">col =</span> <span class="kw">c</span>(<span class="st">&quot;#8da0cb&quot;</span>, <span class="st">&quot;#e78ac3&quot;</span>), <span class="dt">lwd =</span> <span class="dv">2</span>, </a>
+<a class="sourceLine" id="cb11-10" title="10">           <span class="dt">legend =</span> <span class="kw">c</span>(<span class="st">&quot;Starting value set 1&quot;</span>, <span class="st">&quot;Starting value set 2&quot;</span>), <span class="dt">bty =</span> <span class="st">&quot;n&quot;</span>)</a>
+<a class="sourceLine" id="cb11-11" title="11">  }</a>
+<a class="sourceLine" id="cb11-12" title="12">}</a></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+<p>It can be observed that the parameter estimates converge to the same parameter space, and that the chains mix well. Also, there is no evidence of label switching.</p>
+</div>
+</div>
+<div id="references" class="section level2 unnumbered">
+<h2>References</h2>
+<div id="refs" class="references">
+<div id="ref-altman2007">
+<p>Altman, Rachel MacKay. 2007. “Mixed Hidden Markov Models: An Extension of the Hidden Markov Model to the Longitudinal Data Setting.” <em>Journal of the American Statistical Association</em> 102 (477): 201–10.</p>
+</div>
+<div id="ref-burge1998">
+<p>Burge, Christopher B, and Samuel Karlin. 1998. “Finding the Genes in Genomic Dna.” <em>Current Opinion in Structural Biology</em> 8 (3): 346–54.</p>
+</div>
+<div id="ref-cappe2005">
+<p>Cappé, E. AND Rydén, O. AND Moulines. 2005. <em>Inference in Hidden Markov Models</em>. New York: Springer.</p>
+</div>
+<div id="ref-ephraim2002">
+<p>Ephraim, Yariv, and Neri Merhav. 2002. “Hidden Markov Processes.” <em>Information Theory, IEEE Transactions on</em> 48 (6): 1518–69.</p>
+</div>
+<div id="ref-forney1973">
+<p>Forney Jr, G David. 1973. “The Viterbi Algorithm.” <em>Proceedings of the IEEE</em> 61 (3): 268–78.</p>
+</div>
+<div id="ref-deHaan2017">
+<p>Haan-Rietdijk, S de, Peter Kuppens, Cindy S Bergeman, LB Sheeber, NB Allen, and EL Hamaker. 2017. “On the Use of Mixed Markov Models for Intensive Longitudinal Data.” <em>Multivariate Behavioral Research</em> 52 (6): 747–67.</p>
+</div>
+<div id="ref-henderson1997">
+<p>Henderson, John, Steven Salzberg, and Kenneth H Fasman. 1997. “Finding Genes in Dna with a Hidden Markov Model.” <em>Journal of Computational Biology</em> 4 (2): 127–41.</p>
+</div>
+<div id="ref-krogh1994">
+<p>Krogh, Anders, I Saira Mian, and David Haussler. 1994. “A Hidden Markov Model That Finds Genes in E. Coli Dna.” <em>Nucleic Acids Research</em> 22 (22): 4768–78.</p>
+</div>
+<div id="ref-Rabiner1989">
+<p>Rabiner, Lawrence R. 1989. “A Tutorial on Hidden Markov Models and Selected Applications in Speech Recognition.” <em>Proceedings of the IEEE</em> 77 (2): 257–86.</p>
+</div>
+<div id="ref-rueda2013">
+<p>Rueda, Oscar M, Cristina Rueda, and Ramon Diaz-Uriarte. 2013. “A Bayesian HMM with Random Effects and an Unknown Number of States for DNA Copy Number Analysis.” <em>Journal of Statistical Computation and Simulation</em> 83 (1): 82–96.</p>
+</div>
+<div id="ref-ryden2008">
+<p>Rydén, Tobias. 2008. “EM Versus Markov Chain Monte Carlo for Estimation of Hidden Markov Models: A Computational Perspective.” <em>Bayesian Analysis</em> 3 (4): 659–88.</p>
+</div>
+<div id="ref-scott2002">
+<p>Scott, Steven L. 2002. “Bayesian Methods for Hidden Markov Models.” <em>Journal of the American Statistical Association</em> 97 (457).</p>
+</div>
+<div id="ref-shirley2010">
+<p>Shirley, Kenneth E, Dylan S Small, Kevin G Lynch, Stephen A Maisto, and David W Oslin. 2010. “Hidden Markov Models for Alcoholism Treatment Trial Data.” <em>The Annals of Applied Statistics</em>, 366–95.</p>
+</div>
+<div id="ref-viterbi1967">
+<p>Viterbi, Andrew J. 1967. “Error Bounds for Convolutional Codes and an Asymptotically Optimum Decoding Algorithm.” <em>Information Theory, IEEE Transactions on</em> 13 (2): 260–69.</p>
+</div>
+<div id="ref-woodland2002">
+<p>Woodland, Philip C, and Daniel Povey. 2002. “Large Scale Discriminative Training of Hidden Markov Models for Speech Recognition.” <em>Computer Speech &amp; Language</em> 16 (1): 25–47.</p>
+</div>
+<div id="ref-zhang2014">
+<p>Zhang, Yue, and Kiros Berhane. 2014. “Bayesian Mixed Hidden Markov Models: A Multi-Level Approach to Modeling Categorical Outcomes with Differential Misclassification.” <em>Statistics in Medicine</em> 33 (8): 1395–1408.</p>
+</div>
+<div id="ref-zucchini2016">
+<p>Zucchini, Walter, Iain L MacDonald, and Roland Langrock. 2016. <em>Hidden Markov Models for Time Series: An Introduction Using R</em>. Boca Raton: CRC Press.</p>
+</div>
+</div>
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>Note that the likelihood ratio test, commonly used to compare nested models, cannot be used in case of the HMM (i.e., the difference in the log-likelihoods between models is not <span class="math inline">\(\chi^2\)</span> distributed <span class="citation">Rydén (2008)</span>).<a href="#fnref1" class="footnote-back">↩</a></p></li>
+<li id="fn2"><p>We note, however, that the AIC approximates the posterior distribution of the parameters by a Gaussian distribution, which might not be appropriate for models including parameters on the boundary of the parameter space (e.g., close to 0 or 1 in case of probability estimates), or for small data sets, as exemplified by <span class="citation">Scott (2002)</span>. Model selection is therefore not a straightforward procedure in the context of HMM, and the choices remain subjective.<a href="#fnref2" class="footnote-back">↩</a></p></li>
+</ol>
+</div>
+
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
