@@ -1,7 +1,7 @@
 Package: mHMMbayes
 Type: Package
 Title: Multilevel Hidden Markov Models Using Bayesian Estimation
-Version: 0.1.0
+Version: 0.1.1
 Depends: R (>= 3.5.0)
 Imports: MCMCpack, mvtnorm, stats, Rdpack
 Authors@R: person("Emmeke", "Aarts", email = "e.aarts@uu.nl",
@@ -34,7 +34,7 @@ Suggests: knitr, rmarkdown, alluvial, grDevices, RColorBrewer, testthat
 VignetteBuilder: knitr
 RdMacros: Rdpack
 NeedsCompilation: no
-Packaged: 2019-10-21 12:35:52 UTC; 0446564
+Packaged: 2019-10-30 10:53:19 UTC; emmeke
 Author: Emmeke Aarts [aut, cre]
 Repository: CRAN
-Date/Publication: 2019-10-25 07:20:02 UTC
+Date/Publication: 2019-10-30 11:30:08 UTC
