@@ -1,16 +1,16 @@
-## ----setup, include = FALSE----------------------------------------------
+## ----setup, include = FALSE---------------------------------------------------
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
 
-## ----load package and data, include = FALSE------------------------------
+## ----load package and data, include = FALSE-----------------------------------
 library(mHMMbayes)
 nonverbal <- data.frame(nonverbal)
 head(nonverbal)
 old_par <- graphics::par(no.readonly =TRUE)
 
-## ----plot observed data, fig.width = 7.2, fig.height = 3.5, echo = FALSE----
+## ----plot observed data, fig.width = 7.2, fig.height = 3.5, echo = FALSE------
 # set labels and colors for the observed behavioral categorical outcomes
 library(RColorBrewer)
 Voc_lab <- c("Not Speaking", "Speaking", "Back channeling")
@@ -43,7 +43,7 @@ legend("topleft", bty = "n", fill = Look_col, legend = Look_lab)
 graphics::par(old_par)
 
 
-## ----settings and load 2 state model, include = FALSE--------------------
+## ----settings and load 2 state model, include = FALSE-------------------------
 # specifying general model properties:
 m <- 2
 n_dep <- 4
@@ -68,7 +68,7 @@ start_EM <- list(matrix(c(0.05, 0.90, 0.05,
 load("nonv_2st_1000it.rda")
 out_2st <- out1
 
-## ----show specifying 2 state model, eval = FALSE-------------------------
+## ----show specifying 2 state model, eval = FALSE------------------------------
 #  library(mHMMbayes)
 #  # specifying general model properties:
 #  m <- 2
@@ -91,7 +91,7 @@ out_2st <- out1
 #                             0.1, 0.9), byrow = TRUE, nrow = m,
 #                           ncol = q_emiss[4])) # looking therapist
 
-## ----show fitting 2 state model, eval = FALSE----------------------------
+## ----show fitting 2 state model, eval = FALSE---------------------------------
 #  # Run a model without covariate(s) and default priors:
 #  set.seed(14532)
 #  out_2st <- mHMM(s_data = nonverbal,
@@ -100,13 +100,13 @@ out_2st <- out1
 #                      mcmc = list(J = 1000, burn_in = 200))
 #  
 
-## ----show print model----------------------------------------------------
+## ----show print model---------------------------------------------------------
 out_2st
 
-## ----show summary model--------------------------------------------------
+## ----show summary model-------------------------------------------------------
 summary(out_2st)
 
-## ----show obtain gamma function------------------------------------------
+## ----show obtain gamma function-----------------------------------------------
 # When not specified, level defaults to "group"
 gamma_pop <- obtain_gamma(out_2st)
 gamma_pop
@@ -115,32 +115,32 @@ gamma_pop
 gamma_subj <- obtain_gamma(out_2st, level = "subject")
 gamma_subj
 
-## ----show plot posterior densities, fig.width = 7.2, fig.height = 4------
+## ----show plot posterior densities, fig.width = 7.2, fig.height = 4-----------
 library(RColorBrewer)
 Voc_col <- c(brewer.pal(3,"PuBuGn")[c(1,3,2)])
 Voc_lab <- c("Not Speaking", "Speaking", "Back channeling")
 
 plot(out_2st, component = "emiss", dep = 1, col = Voc_col, 
-     parameter = "emiss", dep_lab = c("Patient vocalizing"), cat_lab = Voc_lab)
+     dep_lab = c("Patient vocalizing"), cat_lab = Voc_lab)
 
-## ----show plot transition prob, fig.show='hold'--------------------------
+## ----show plot transition prob, fig.show='hold'-------------------------------
 # Transition probabilities at the group level and for subject number 1, respectively:
 plot(gamma_pop, col = rep(rev(brewer.pal(3,"PiYG"))[-2], each = m))
 plot(gamma_subj, subj_nr = 1, col = rep(rev(brewer.pal(3,"PiYG"))[-2], each = m))
 
-## ----load 3 and 4 state models, include = FALSE--------------------------
+## ----load 3 and 4 state models, include = FALSE-------------------------------
 # load("nonv_3st_1000it.rda")
 # out_3st <- out2
 load("nonv_4st_1000it.rda")
 out_4st <- out3
 
-## ----show 4 state model, fig.width = 5, fig.height = 3-------------------
+## ----show 4 state model, fig.width = 5, fig.height = 3------------------------
 summary(out_4st)
 
 m <- 4
 plot(obtain_gamma(out_4st), cex = .5, col = rep(rev(brewer.pal(5,"PiYG"))[-3], each = m))
 
-## ----using viterbi algorithm---------------------------------------------
+## ----using viterbi algorithm--------------------------------------------------
 state_seq <- vit_mHMM(out_2st, s_data = nonverbal)
  head(state_seq)
 
@@ -184,7 +184,7 @@ legend("topleft", bty = "n", fill = State_col, legend = c("State 1", "State 2"))
 graphics::par(old_par)
 
 
-## ----loading model convergence, include = FALSE--------------------------
+## ----loading model convergence, include = FALSE-------------------------------
 # specifying general model properties
 m <-2
 n_dep <- 4
@@ -209,7 +209,7 @@ start_EM_b <- list(matrix(c(0.2, 0.6, 0.2,
 load("nonv_2stb_1000it.rda")
 out_2st_b <- out1b
 
-## ----showing model convergence I, eval= FALSE----------------------------
+## ----showing model convergence I, eval= FALSE---------------------------------
 #  # specifying general model properties
 #  m <-2
 #  n_dep <- 4
@@ -253,6 +253,6 @@ for(i in 1:m){
   }
 }
 
-## ---- include = FALSE----------------------------------------------------
+## ---- include = FALSE---------------------------------------------------------
 graphics::par(old_par)
 
