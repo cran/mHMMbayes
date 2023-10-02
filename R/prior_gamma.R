@@ -49,10 +49,10 @@
 #' are fixed over subjects.
 #'
 #' @param m Numeric vector with length 1 denoting the number of hidden states.
-#' @param n_xx_gamma Optional numeric vector with length 1 denoting the number of
-#'   (level 2) covariates used to predict the transition probability matrix
-#'   gamma. When omitted, the model assumes no covariates are used to predict
-#'   gamma.
+#' @param n_xx_gamma Optional numeric vector with length 1 denoting the number
+#'   of (level 2) covariates (excluding the intercept) used to predict the
+#'   transition probability matrix gamma. When omitted, the model assumes no
+#'   covariates are used to predict gamma.
 #' @param gamma_mu0 A list containing m matrices; one matrix for each row of the
 #'   transition probability matrix gamma. Each matrix contains the hypothesized
 #'   hyper-prior mean values of the intercepts of the Multinomial logit
@@ -168,17 +168,18 @@
 #'                     start_val = c(list(start_TM), start_EM),
 #'                     gamma_hyp_prior = manual_prior_gamma,
 #'                     mcmc = list(J = 11, burn_in = 5))
+#'
+#' out_3st_infgamma
+#' summary(out_3st_infgamma)
 #' }
 #' \dontshow{
 #' out_3st_infgamma <- mHMM(s_data = nonverbal,
 #'                     gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
 #'                     start_val = c(list(start_TM), start_EM),
 #'                     gamma_hyp_prior = manual_prior_gamma,
-#'                     mcmc = list(J = 6, burn_in = 3))
+#'                     mcmc = list(J = 5, burn_in = 3))
 #' }
 #'
-#' out_3st_infgamma
-#' summary(out_3st_infgamma)
 #'
 #' @export
 #'

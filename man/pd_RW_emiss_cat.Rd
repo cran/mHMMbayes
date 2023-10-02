@@ -9,11 +9,13 @@ pd_RW_emiss_cat(gen, emiss_int_mle0, emiss_scalar, emiss_w)
 \arguments{
 \item{gen}{List containing the following elements denoting the general model
 properties:
-\itemize{\item{\code{m}: numeric vector with length 1 denoting the number
+\itemize{
+\item{\code{m}: numeric vector with length 1 denoting the number
 of hidden states}
 \item{\code{n_dep}: numeric vector with length 1 denoting the
 number of dependent variables}
-\item{\code{q_emiss}: numeric vector with length \code{n_dep} denoting the
+\item{\code{q_emiss}: only to be specified if the data represents
+categorical data. Numeric vector with length \code{n_dep} denoting the
 number of observed categories for the categorical emission distribution
 for each of the dependent variables.}}}
 
@@ -139,14 +141,6 @@ out_3st_RWemiss <- mHMM(s_data = nonverbal,
                          start_val = c(list(start_TM), start_EM),
                          emiss_sampler = manual_emiss_sampler,
                          mcmc = list(J = 11, burn_in = 5))
-}
-\dontshow{
-out_3st_RWemiss <- mHMM(s_data = nonverbal,
-                         gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
-                         start_val = c(list(start_TM), start_EM),
-                         emiss_sampler = manual_emiss_sampler,
-                         mcmc = list(J = 6, burn_in = 3))
-}
 
 out_3st_RWemiss
 summary(out_3st_RWemiss)
@@ -159,7 +153,16 @@ RW_emiss_accept <- sapply(out_3st_RWemiss$emiss_naccept, div_J, J_it, simplify =
 
 # average acceptance rate over all subjects per parameter
 # rows represent each of the n_dep dependent variables, columns represent the m states
-t(sapply(RW_emiss_accept, apply, MARGIN = 2, mean, simplyfy = FALSE))
+t(sapply(RW_emiss_accept, apply, MARGIN = 2, mean))
+}
+\dontshow{
+out_3st_RWemiss <- mHMM(s_data = nonverbal,
+                         gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
+                         start_val = c(list(start_TM), start_EM),
+                         emiss_sampler = manual_emiss_sampler,
+                         mcmc = list(J = 5, burn_in = 3))
+}
+
 
 }
 \references{
