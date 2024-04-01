@@ -382,8 +382,8 @@ multilevel framework, we allow for heterogeneity in the model parameters
 (transition probability matrix and conditional distribution), while
 estimating one overall HMM. The model has a great potential of
 application in many fields, such as the social sciences and medicine.
-The model can be fitted on multivariate categorical or continous data,
-and include individual level covariates (allowing for e.g., group
+The model can be fitted on multivariate categorical, continous, or count
+data, and include individual level covariates (allowing for e.g., group
 comparisons on model parameters). Parameters are estimated using
 Bayesian estimation utilizing the forward-backward recursion within a
 hybrid Metropolis within Gibbs sampler. The package also includes a
@@ -781,13 +781,14 @@ on:</p>
 <span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="co">#&gt; 1000 iterations used in the MCMC algorithm with a burn in of 200 </span></span>
 <span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="co">#&gt; Average Log likelihood over all subjects: -1622.789 </span></span>
-<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="co">#&gt; Average AIC over all subjects: 3273.579 </span></span>
-<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a><span class="co">#&gt; Number of states used: 2 </span></span>
-<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="co">#&gt; Number of dependent variables used: 4 </span></span>
-<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a><span class="co">#&gt; Type of dependent variable(s): categorical</span></span></code></pre></div>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="co">#&gt; Average AIC over all subjects:  3273.579 </span></span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a><span class="co">#&gt; Average AICc over all subjects: 3274.053 </span></span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a><span class="co">#&gt; Number of states used: 2 </span></span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a><span class="co">#&gt; Number of dependent variables used: 4 </span></span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a><span class="co">#&gt; Type of dependent variable(s): categorical</span></span></code></pre></div>
 <p>The <code>summary</code> method provides information on the estimated
 parameters. That is, the point estimates of the posterior distribution
 for the transition probability matrix and the emission distribution of
