@@ -69,36 +69,36 @@ load("nonv_2st_1000it.rda")
 out_2st <- out1
 
 ## ----show specifying 2 state model, eval = FALSE------------------------------
-#  library(mHMMbayes)
-#  # specifying general model properties:
-#  m <- 2
-#  n_dep <- 4
-#  q_emiss <- c(3, 2, 3, 2)
-#  
-#  # specifying starting values
-#  start_TM <- diag(.8, m)
-#  start_TM[lower.tri(start_TM) | upper.tri(start_TM)] <- .2
-#  start_EM <- list(matrix(c(0.05, 0.90, 0.05,
-#                            0.90, 0.05, 0.05), byrow = TRUE,
-#                           nrow = m, ncol = q_emiss[1]), # vocalizing patient
-#                    matrix(c(0.1, 0.9,
-#                             0.1, 0.9), byrow = TRUE, nrow = m,
-#                           ncol = q_emiss[2]), # looking patient
-#                    matrix(c(0.90, 0.05, 0.05,
-#                             0.05, 0.90, 0.05), byrow = TRUE,
-#                           nrow = m, ncol = q_emiss[3]), # vocalizing therapist
-#                    matrix(c(0.1, 0.9,
-#                             0.1, 0.9), byrow = TRUE, nrow = m,
-#                           ncol = q_emiss[4])) # looking therapist
+# library(mHMMbayes)
+# # specifying general model properties:
+# m <- 2
+# n_dep <- 4
+# q_emiss <- c(3, 2, 3, 2)
+# 
+# # specifying starting values
+# start_TM <- diag(.8, m)
+# start_TM[lower.tri(start_TM) | upper.tri(start_TM)] <- .2
+# start_EM <- list(matrix(c(0.05, 0.90, 0.05,
+#                           0.90, 0.05, 0.05), byrow = TRUE,
+#                          nrow = m, ncol = q_emiss[1]), # vocalizing patient
+#                   matrix(c(0.1, 0.9,
+#                            0.1, 0.9), byrow = TRUE, nrow = m,
+#                          ncol = q_emiss[2]), # looking patient
+#                   matrix(c(0.90, 0.05, 0.05,
+#                            0.05, 0.90, 0.05), byrow = TRUE,
+#                          nrow = m, ncol = q_emiss[3]), # vocalizing therapist
+#                   matrix(c(0.1, 0.9,
+#                            0.1, 0.9), byrow = TRUE, nrow = m,
+#                          ncol = q_emiss[4])) # looking therapist
 
 ## ----show fitting 2 state model, eval = FALSE---------------------------------
-#  # Run a model without covariate(s) and default priors:
-#  set.seed(14532)
-#  out_2st <- mHMM(s_data = nonverbal,
-#                      gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
-#                      start_val = c(list(start_TM), start_EM),
-#                      mcmc = list(J = 1000, burn_in = 200))
-#  
+# # Run a model without covariate(s) and default priors:
+# set.seed(14532)
+# out_2st <- mHMM(s_data = nonverbal,
+#                     gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
+#                     start_val = c(list(start_TM), start_EM),
+#                     mcmc = list(J = 1000, burn_in = 200))
+# 
 
 ## ----show print model---------------------------------------------------------
 out_2st
@@ -210,34 +210,34 @@ load("nonv_2stb_1000it.rda")
 out_2st_b <- out1b
 
 ## ----showing model convergence I, eval= FALSE---------------------------------
-#  # specifying general model properties
-#  m <-2
-#  n_dep <- 4
-#  q_emiss <- c(3, 2, 3, 2)
-#  
-#  # specifying different starting values
-#  start_TM <- diag(.8, m)
-#  start_TM[lower.tri(start_TM) | upper.tri(start_TM)] <- .2
-#  start_EM_b <- list(matrix(c(0.2, 0.6, 0.2,
-#                              0.6, 0.2, 0.2), byrow = TRUE,
-#                          nrow = m, ncol = q_emiss[1]), # vocalizing patient
-#                   matrix(c(0.4, 0.6,
-#                            0.4, 0.6), byrow = TRUE, nrow = m,
-#                          ncol = q_emiss[2]), # looking patient
-#                   matrix(c(0.6, 0.2, 0.2,
-#                            0.2, 0.6, 0.2), byrow = TRUE,
-#                          nrow = m, ncol = q_emiss[3]), # vocalizing therapist
-#                   matrix(c(0.4, 0.6,
-#                            0.4, 0.6), byrow = TRUE, nrow = m,
-#                          ncol = q_emiss[4])) # looking therapist
-#  
-#  # Run a model identical to out_2st, but with different starting values:
-#  set.seed(9843)
-#  out_2st_b <- mHMM(s_data = nonverbal,
-#                        gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
-#                        start_val = c(list(start_TM), start_EM),
-#                        mcmc = list(J = 1000, burn_in = 200))
-#  
+# # specifying general model properties
+# m <-2
+# n_dep <- 4
+# q_emiss <- c(3, 2, 3, 2)
+# 
+# # specifying different starting values
+# start_TM <- diag(.8, m)
+# start_TM[lower.tri(start_TM) | upper.tri(start_TM)] <- .2
+# start_EM_b <- list(matrix(c(0.2, 0.6, 0.2,
+#                             0.6, 0.2, 0.2), byrow = TRUE,
+#                         nrow = m, ncol = q_emiss[1]), # vocalizing patient
+#                  matrix(c(0.4, 0.6,
+#                           0.4, 0.6), byrow = TRUE, nrow = m,
+#                         ncol = q_emiss[2]), # looking patient
+#                  matrix(c(0.6, 0.2, 0.2,
+#                           0.2, 0.6, 0.2), byrow = TRUE,
+#                         nrow = m, ncol = q_emiss[3]), # vocalizing therapist
+#                  matrix(c(0.4, 0.6,
+#                           0.4, 0.6), byrow = TRUE, nrow = m,
+#                         ncol = q_emiss[4])) # looking therapist
+# 
+# # Run a model identical to out_2st, but with different starting values:
+# set.seed(9843)
+# out_2st_b <- mHMM(s_data = nonverbal,
+#                       gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
+#                       start_val = c(list(start_TM), start_EM),
+#                       mcmc = list(J = 1000, burn_in = 200))
+# 
 
 ## ----showing model convergence II trace plots, fig.width = 7.2, fig.height = 7----
 par(mfrow = c(m,q_emiss[2]))
@@ -253,6 +253,6 @@ for(i in 1:m){
   }
 }
 
-## ---- include = FALSE---------------------------------------------------------
+## ----include = FALSE----------------------------------------------------------
 graphics::par(old_par)
 
